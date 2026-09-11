@@ -1,0 +1,132 @@
+﻿{% extends "base.html" %}
+{% block title %}Sign In - StudyAI{% endblock %}
+
+{% block public_content %}
+<style>
+    /* Premium Ambient Background */
+    .auth-bg {
+        min-height: calc(100vh - 80px);
+        background: radial-gradient(circle at 15% 25%, rgba(79, 70, 229, 0.12) 0%, transparent 45%),
+                    radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+                    var(--bg-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
+    }
+    .auth-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        padding: 2.5rem;
+        transition: transform 0.3s ease;
+    }
+    .btn-gradient-signin {
+        background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%) !important;
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient-signin:hover {
+        opacity: 0.92;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.35);
+    }
+</style>
+
+<div class="auth-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="auth-card">
+                    
+                    <!-- Brand Icon & Header -->
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex p-3 rounded-circle mb-3 shadow-sm text-white" 
+                             style="background: linear-gradient(135deg, #4f46e5, #06b6d4);">
+                            <i class="bi bi-cpu-fill fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">Welcome Back</h3>
+                        <p class="text-muted small mb-0">Sign in to resume your study streak 🔥</p>
+                    </div>
+
+                    <!-- Sign In Form -->
+                    <form method="POST" action="{{ url_for('login') }}">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Email Input with Icon -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </span>
+                                {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Password Input with Eye Toggle -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                {{ form.password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.password.errors else ""), id="loginPassword", placeholder="••••••••") }}
+                                <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')">
+                                    <i class="bi bi-eye-fill" id="eyeIconLogin"></i>
+                                </button>
+                            </div>
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Remember Me Checkbox -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                {{ form.remember(class="form-check-input") }}
+                                {{ form.remember.label(class="form-check-label small text-muted") }}
+                            </div>
+                        </div>
+
+                        <!-- Gradient Sign In Button -->
+                        <button type="submit" class="btn btn-gradient-signin w-100 py-2 rounded-3 shadow-sm">
+                            Sign In <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </form>
+
+                    <!-- Switch to Register Link -->
+                    <div class="text-center mt-4 border-top pt-3">
+                        <p class="small text-muted mb-0">Don't have an account? 
+                            <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">
+                                Create Account
+                            </a>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePasswordVisibility(fieldId, iconId) {
+    const input = document.getElementById(fieldId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash-fill';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye-fill';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Tasks & Planner{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h3 class="fw-bold mb-1">Study Planner</h3>
+        <p class="text-muted small mb-0">Organize subjects, define milestone tasks, and regulate priorities.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+            <i class="bi bi-folder-plus me-1"></i> Add Subject
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="bi bi-plus-circle me-1"></i> Add Task
+        </button>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="custom-card mb-4 p-3">
+    <form method="GET" action="{{ url_for('planner') }}" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="subject_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">All Subjects</option>
+                {% for subj in subjects %}
+                    <option value="{{ subj.id }}" {% if subject_filter == subj.id %}selected{% endif %}>{{ subj.subject_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="All">All Priorities</option>
+                <option value="High" {% if priority_filter == 'High' %}selected{% endif %}>High Priority</option>
+                <option value="Medium" {% if priority_filter == 'Medium' %}selected{% endif %}>Medium Priority</option>
+                <option value="Low" {% if priority_filter == 'Low' %}selected{% endif %}>Low Priority</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="All">All Statuses</option>
+                <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if status_filter == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group input-group-sm">
+                <input type="text" name="q" class="form-control" placeholder="Search tasks..." value="{{ search_query }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row g-4">
+    <!-- Subjects Summary Sidebar -->
+    <div class="col-lg-4">
+        <div class="custom-card">
+            <h5 class="fw-bold mb-3">Enrolled Subjects ({{ subjects|length }})</h5>
+            {% for subj in subjects %}
+            <div class="p-3 mb-2 rounded-3 border bg-body-tertiary">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-semibold" style="color: {{ subj.color }};"><i class="bi bi-bookmark-fill me-1"></i>{{ subj.subject_name }}</span>
+                    <form method="POST" action="{{ url_for('delete_subject', subject_id=subj.id) }}" onsubmit="return confirm('Delete this subject and all its tasks?');">
+                        <button type="submit" class="btn btn-link text-danger p-0 fs-6"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>{{ subj.completed_tasks }}/{{ subj.total_tasks }} tasks</span>
+                    <span>{{ subj.completion_rate }}%</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ subj.completion_rate }}%; background-color: {{ subj.color }};"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Task Master List -->
+    <div class="col-lg-8">
+        <div class="custom-card">
+            <h5 class="fw-bold mb-3">Study Tasks ({{ tasks|length }})</h5>
+            {% if tasks %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;"></th>
+                                <th>Task Description</th>
+                                <th>Subject</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr id="task-row-{{ task.id }}" class="{% if task.status == 'Completed' %}task-completed{% endif %}">
+                                <td>
+                                    <input class="form-check-input task-toggle-checkbox" type="checkbox" data-task-id="{{ task.id }}" {% if task.status == 'Completed' %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <span class="task-title fw-semibold">{{ task.task_name }}</span>
+                                    <div class="small text-muted">{{ task.estimated_hours }} hrs est.</div>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ task.subject.color }};">{{ task.subject.subject_name }}</span>
+                                </td>
+                                <td>
+                                    <span class="small {% if task.is_overdue %}text-danger fw-bold{% endif %}">
+                                        {{ task.deadline.strftime('%d %b %Y') }}
+                                        {% if task.is_overdue %}<br><small>(Overdue)</small>{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-priority-{{ task.priority }}">{{ task.priority }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if task.status == 'Completed' %}bg-success{% elif task.status == 'In Progress' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ task.status }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" class="d-inline" onsubmit="return confirm('Delete task?');">
+                                        <button class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">No tasks found matching your filter criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Add New Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_subject') }}">
+                {{ subject_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ subject_form.subject_name.label(class="form-label small fw-semibold") }}
+                        {{ subject_form.subject_name(class="form-control", placeholder="e.g. Deep Learning") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ subject_form.color.label(class="form-label small fw-semibold") }}
+                        {{ subject_form.color(class="form-select") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    {{ subject_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Create Study Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_task') }}">
+                {{ task_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ task_form.subject_id.label(class="form-label small fw-semibold") }}
+                        {{ task_form.subject_id(class="form-select") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ task_form.task_name.label(class="form-label small fw-semibold") }}
+                        {{ task_form.task_name(class="form-control", placeholder="e.g. Complete Backpropagation Proofs") }}
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            {{ task_form.deadline.label(class="form-label small fw-semibold") }}
+                            {{ task_form.deadline(class="form-control") }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ task_form.priority.label(class="form-label small fw-semibold") }}
+                            {{ task_form.priority(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            {{ task_form.status.label(class="form-label small fw-semibold") }}
+                            {{ task_form.status(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ task_form.estimated_hours.label(class="form-label small fw-semibold") }}
+                            {{ task_form.estimated_hours(class="form-control", step="0.5") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    {{ task_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

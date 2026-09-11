@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Study Planner{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<div class="app-wrapper">
+    <aside class="sidebar">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <i class="bi bi-cpu-fill fs-3 text-primary me-2"></i>
+            <h5 class="mb-0 fw-bold">StudyAI</h5>
+        </div>
+
+        <nav class="nav flex-column mb-auto">
+            <a href="{{ url_for('dashboard') }}" class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+            </a>
+            <a href="{{ url_for('planner') }}" class="nav-link-custom {% if request.endpoint == 'planner' %}active{% endif %}">
+                <i class="bi bi-calendar2-check-fill"></i> Tasks & Planner
+            </a>
+            <a href="{{ url_for('reports') }}" class="nav-link-custom {% if request.endpoint == 'reports' %}active{% endif %}">
+                <i class="bi bi-bar-chart-line-fill"></i> Analytics
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-link-custom {% if request.endpoint == 'profile' %}active{% endif %}">
+                <i class="bi bi-person-gear"></i> Settings
+            </a>
+        </nav>
+
+        <!-- Sidebar Bottom: Theme Toggle + User Symbol Logo with Name & Streak Below -->
+        <div class="border-top pt-3">
+            <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary w-100 mb-3">
+                <i class="bi bi-moon-stars"></i> Toggle Theme
+            </button>
+            <div class="d-flex align-items-center justify-content-between px-1">
+                <div class="d-flex align-items-center">
+                    <!-- User Avatar Symbol Logo -->
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 40px; height: 40px; min-width: 40px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                    <!-- Name & Streak Directly Below -->
+                    <div class="overflow-hidden">
+                        <div class="fw-bold text-truncate" style="max-width: 120px; font-size: 0.95rem;">
+                            {{ current_user.name }}
+                        </div>
+                        <span class="badge bg-warning text-dark py-0 px-2 fw-semibold" style="font-size: 0.72rem;">
+                            🔥 {{ current_user.get_study_streak() }} Days
+                        </span>
+                    </div>
+                </div>
+                <!-- Logout Button -->
+                <a href="{{ url_for('logout') }}" class="text-danger fs-5 ms-2" title="Sign Out">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="d-lg-none mb-3">
+            <button class="btn btn-primary" onclick="document.querySelector('.sidebar').classList.toggle('show')">
+                <i class="bi bi-list"></i> Menu
+            </button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% else %}
+    <nav class="navbar navbar-light bg-white border-bottom py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="{{ url_for('index') }}"><i class="bi bi-cpu-fill me-2"></i>StudyAI</a>
+            <div>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm me-2">Sign In</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Get Started</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block public_content %}{% endblock %}
+    </main>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Study Analytics{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Academic Analytics & Insights</h3>
+        <p class="text-muted small mb-0">Visual performance charts powered by Chart.js and AI deficit calculations.</p>
+    </div>
+</div>
+
+<div id="analyticsContainer">
+    <!-- Top Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Total Study Time</span>
+                <h3 class="fw-bold text-primary mt-1">{{ total_hours }} hrs</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Completion Efficiency</span>
+                <h3 class="fw-bold text-success mt-1">{{ completion_rate }}%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Tasks Finished</span>
+                <h3 class="fw-bold text-info mt-1">{{ completed_tasks }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Pending Backlog</span>
+                <h3 class="fw-bold text-warning mt-1">{{ total_tasks - completed_tasks }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Chart.js Interactive Graphs -->
+    <div class="row g-4 mb-4">
+        <!-- 1. Weekly Study Hours -->
+        <div class="col-lg-7">
+            <div class="custom-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Weekly Study Hours vs Target</h5>
+                <div style="height: 280px;">
+                    <canvas id="weeklyStudyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Task Breakdown Doughnut -->
+        <div class="col-lg-5">
+            <div class="custom-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill text-info me-2"></i>Task Completion Breakdown</h5>
+                <div style="height: 280px;">
+                    <canvas id="taskStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Subject Progress Bar Chart -->
+        <div class="col-lg-6">
+            <div class="custom-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-layers-fill text-success me-2"></i>Subject Syllabus Completion Rate</h5>
+                <div style="height: 280px;">
+                    <canvas id="subjectProgressChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Monthly Trend Area Chart -->
+        <div class="col-lg-6">
+            <div class="custom-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-activity text-danger me-2"></i>30-Day Study Consistency Trend</h5>
+                <div style="height: 280px;">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Study Time Recommendations Table -->
+    <div class="custom-card">
+        <h5 class="fw-bold mb-3"><i class="bi bi-cpu text-primary me-2"></i>AI Recommended Subject Time Re-allocation</h5>
+        <p class="text-muted small">Calculated dynamically to compensate for subjects with completion rates under 50% or approaching deadlines.</p>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Current Completion</th>
+                        <th>AI Recommended Daily Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in ai_recommendations %}
+                    <tr>
+                        <td>
+                            <span class="badge" style="background-color: {{ rec.color }};">{{ rec.subject_name }}</span>
+                        </td>
+                        <td>{{ rec.completion_rate }}%</td>
+                        <td><strong>{{ rec.suggested_hours }} hrs/day</strong></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">All subject workloads are balanced.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

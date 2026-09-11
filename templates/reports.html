@@ -1,0 +1,55 @@
+﻿{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-4">Study Analytics</h3>
+
+<div id="analyticsContainer">
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Total Hours Logged</span>
+                <h3 class="fw-bold text-primary mt-1">{{ total_hours }} hrs</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Completion Rate</span>
+                <h3 class="fw-bold text-success mt-1">{{ completion_rate }}%</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="custom-card text-center">
+                <span class="text-muted small">Finished Tasks</span>
+                <h3 class="fw-bold text-info mt-1">{{ completed_tasks }} / {{ total_tasks }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="custom-card" style="height: 350px;">
+                <h6 class="fw-bold mb-3">Weekly Study Hours vs Target</h6>
+                <div style="height: 270px;"><canvas id="weeklyStudyChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="custom-card" style="height: 350px;">
+                <h6 class="fw-bold mb-3">Task Breakdown</h6>
+                <div style="height: 270px;"><canvas id="taskStatusChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="custom-card" style="height: 350px;">
+                <h6 class="fw-bold mb-3">Subject Completion %</h6>
+                <div style="height: 270px;"><canvas id="subjectProgressChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="custom-card" style="height: 350px;">
+                <h6 class="fw-bold mb-3">30-Day Trend</h6>
+                <div style="height: 270px;"><canvas id="monthlyTrendChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

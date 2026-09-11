@@ -1,0 +1,105 @@
+﻿{% extends "base.html" %}
+{% block title %}Create Account - StudyAI{% endblock %}
+
+{% block public_content %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg rounded-4 p-4 p-sm-5 bg-body">
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <div class="bg-primary text-white d-inline-flex p-3 rounded-circle mb-3 shadow-sm" style="background: linear-gradient(135deg, #10b981, #06b6d4) !important;">
+                        <i class="bi bi-person-plus-fill fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Create Account</h3>
+                    <p class="text-muted small">Join StudyAI & build a consistent study habit</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
+                            {{ form.name(class="form-control border-start-0 ps-0" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Alex Kumar") }}
+                        </div>
+                        {% for error in form.name.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-envelope-fill"></i></span>
+                            {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                        </div>
+                        {% for error in form.email.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Password with Eye Toggle -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-lock-fill"></i></span>
+                            {{ form.password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.password.errors else ""), id="regPassword", placeholder="At least 6 characters") }}
+                            <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('regPassword', 'eyeIcon2')">
+                                <i class="bi bi-eye-fill" id="eyeIcon2"></i>
+                            </button>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Confirm Password with Eye Toggle -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-shield-check"></i></span>
+                            {{ form.confirm_password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.confirm_password.errors else ""), id="regConfirmPassword", placeholder="Repeat password") }}
+                            <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('regConfirmPassword', 'eyeIcon3')">
+                                <i class="bi bi-eye-fill" id="eyeIcon3"></i>
+                            </button>
+                        </div>
+                        {% for error in form.confirm_password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Gradient Register Button -->
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm text-white" style="background: linear-gradient(135deg, #10b981, #06b6d4); border: none;">
+                        <i class="bi bi-rocket-takeoff-fill me-1"></i> Register Free
+                    </button>
+                </form>
+
+                <!-- Footer Switch Link -->
+                <div class="text-center mt-4 border-top pt-3">
+                    <p class="small text-muted mb-0">Already registered? 
+                        <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">Sign In here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePasswordVisibility(fieldId, iconId) {
+    const input = document.getElementById(fieldId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash-fill';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye-fill';
+    }
+}
+</script>
+{% endblock %}

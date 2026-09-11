@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Study Command Center</h3>
+        <p class="text-muted small mb-0">AI-orchestrated roadmap for {{ today.strftime('%A, %d %B %Y') }}</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickLogModal">
+        <i class="bi bi-stopwatch me-1"></i> Log Study Hours
+    </button>
+</div>
+
+<!-- 8 Core Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Total Subjects</span>
+                    <div class="stat-val">{{ total_subjects }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-info-subtle text-info me-3">
+                    <i class="bi bi-list-task"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Total Tasks</span>
+                    <div class="stat-val">{{ total_tasks }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-success-subtle text-success me-3">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Completed</span>
+                    <div class="stat-val">{{ completed_tasks }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Pending</span>
+                    <div class="stat-val">{{ pending_tasks }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-danger-subtle text-danger me-3">
+                    <i class="bi bi-fire"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Study Streak</span>
+                    <div class="stat-val">{{ streak }} <span class="fs-6 fw-normal text-muted">Days</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Today's Hours</span>
+                    <div class="stat-val">{{ daily_study_hours }} <span class="fs-6 fw-normal text-muted">/ {{ current_user.study_goal_hours }}h</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-info-subtle text-info me-3">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Weekly Progress</span>
+                    <div class="stat-val">{{ weekly_completion_pct }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="custom-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon-wrapper bg-secondary-subtle text-secondary me-3">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small">Weekly Hours</span>
+                    <div class="stat-val">{{ weekly_hours }}h</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Engine Recommendation Hero Banner -->
+{% if ai_subject_rec and ai_subject_rec.subject %}
+<div class="custom-card ai-hero-card mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <span class="badge bg-primary px-3 py-1 mb-2"><i class="bi bi-stars"></i> AI Smart Engine Recommendation</span>
+            <h4 class="fw-bold mb-1">Prioritize Study: {{ ai_subject_rec.subject.subject_name }}</h4>
+            <p class="text-muted mb-2 mb-md-0">{{ ai_subject_rec.reason }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-dark-subtle text-dark p-2 me-2">Urgency Index: {{ ai_subject_rec.score }}</span>
+            <a href="{{ url_for('planner', subject_id=ai_subject_rec.subject.id) }}" class="btn btn-primary btn-sm">
+                View Tasks <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <!-- Prioritized Urgency Queue -->
+    <div class="col-lg-7">
+        <div class="custom-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-alarm text-primary me-2"></i>Urgent Deadlines Queue</h5>
+                <a href="{{ url_for('planner') }}" class="small text-decoration-none">Manage All</a>
+            </div>
+
+            {% if prioritized_tasks %}
+                <div class="list-group list-group-flush">
+                    {% for task in prioritized_tasks %}
+                    <div class="list-group-item px-0 py-2 border-bottom d-flex align-items-center justify-content-between" id="task-row-{{ task.id }}">
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input task-toggle-checkbox me-3 mt-0" type="checkbox" data-task-id="{{ task.id }}" {% if task.status == 'Completed' %}checked{% endif %}>
+                            <div>
+                                <span class="fw-semibold task-title">{{ task.task_name }}</span>
+                                <div class="small text-muted">
+                                    <span class="badge" style="background-color: {{ task.subject.color }};">{{ task.subject.subject_name }}</span>
+                                    • Due: {{ task.deadline.strftime('%d %b') }}
+                                    {% if task.is_overdue %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge badge-priority-{{ task.priority }}">{{ task.priority }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-check2-all fs-1 text-success"></i>
+                    <p class="mt-2">All caught up! No pending urgent tasks.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Automated Daily Focus Schedule -->
+    <div class="col-lg-5">
+        <div class="custom-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-calendar-range text-info me-2"></i>Daily Focus Schedule</h5>
+                <span class="badge bg-info-subtle text-info">{{ current_user.study_goal_hours }}h Goal</span>
+            </div>
+
+            {% if daily_schedule %}
+                <div class="schedule-list">
+                    {% for block in daily_schedule %}
+                    <div class="schedule-block {% if block.is_break %}break{% endif %}">
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>{{ block.time_slot }}</span>
+                            <span>{{ block.duration }}</span>
+                        </div>
+                        <div class="fw-semibold">{{ block.task_name }}</div>
+                        <small class="text-muted">{{ block.subject_name }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">
+                    <p>Create tasks in the planner to automatically generate your study schedule.</p>
+                    <a href="{{ url_for('planner') }}" class="btn btn-outline-primary btn-sm">Add Tasks</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Productivity Suggestions -->
+<div class="custom-card">
+    <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i>Smart Productivity Insights</h5>
+    <div class="row g-3">
+        {% for tip in productivity_tips %}
+        <div class="col-md-4">
+            <div class="p-3 bg-body-tertiary rounded-3 border h-100 d-flex align-items-start">
+                <i class="bi {{ tip.icon }} fs-4 text-{{ tip.type }} me-3"></i>
+                <p class="small mb-0">{{ tip.text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Quick Log Hours Modal -->
+<div class="modal fade" id="quickLogModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Log Study Session</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('log_progress') }}">
+                {{ log_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ log_form.date.label(class="form-label small fw-semibold") }}
+                        {{ log_form.date(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ log_form.study_hours.label(class="form-label small fw-semibold") }}
+                        {{ log_form.study_hours(class="form-control", step="0.5", placeholder="e.g. 2.5") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ log_form.notes.label(class="form-label small fw-semibold") }}
+                        {{ log_form.notes(class="form-control", rows="2", placeholder="Key topics covered or reflections...") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    {{ log_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
