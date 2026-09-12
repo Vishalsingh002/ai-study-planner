@@ -1,4 +1,6 @@
 ﻿import os
+import uuid
+import sqlite3
 from datetime import datetime, date, timedelta
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -23,8 +25,22 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Auto-add profile_image column if missing in SQLite
 with app.app_context():
     db.create_all()
+    try:
+        db_path = os.path.join(app.root_path, 'database.db')
+        if os.path.exists(db_path):
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(users)")
+            cols = [col[1] for col in cursor.fetchall()]
+            if 'profile_image' not in cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'")
+                conn.commit()
+            conn.close()
+    except Exception as e:
+        print(f"Auto-migration: {e}")
 
 # --- Landing & Auth ---
 
@@ -348,7 +364,7 @@ def analytics_data():
         'monthly': {'labels': monthly_labels, 'hours': monthly_hours_data}
     })
 
-# --- Profile & Settings ---
+# --- Profile & Settings (Avatar & Photo Update) ---
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -369,14 +385,33 @@ def profile():
         elif not new_name or not new_email:
             flash('Name and Email cannot be empty.', 'danger')
         else:
+            # 1. Check if user selected a Preset Avatar
+            selected_avatar = request.form.get('selected_avatar')
+            if selected_avatar:
+                current_user.profile_image = selected_avatar
+
+            # 2. Check if user uploaded a custom photo
+            if 'profile_pic' in request.files:
+                file = request.files['profile_pic']
+                if file and file.filename != '':
+                    allowed_exts = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+                    ext = file.filename.rsplit('.', 1)[-1].lower()
+                    if ext in allowed_exts:
+                        unique_filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+                        upload_folder = os.path.join(app.root_path, 'static', 'profile_pics')
+                        os.makedirs(upload_folder, exist_ok=True)
+                        file.save(os.path.join(upload_folder, unique_filename))
+                        current_user.profile_image = unique_filename
+                    else:
+                        flash('Invalid image format. Supported: PNG, JPG, WEBP.', 'warning')
+
             current_user.name = new_name
             current_user.email = new_email
             current_user.study_goal_hours = max(0.5, min(new_goal, 16.0))
             db.session.commit()
-            flash('Profile updated successfully! 🎉', 'success')
+            flash('Profile & Avatar updated successfully! 🎉', 'success')
             return redirect(url_for('profile'))
 
-    # Stats for profile banner
     tasks = Task.query.join(Subject).filter(Subject.user_id == current_user.id).all()
     total_tasks = len(tasks)
     completed_tasks = sum(1 for t in tasks if t.status == 'Completed')

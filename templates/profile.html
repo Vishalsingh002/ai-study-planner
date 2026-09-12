@@ -5,18 +5,32 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold mb-1">Student Profile & Settings</h3>
-        <p class="text-muted small mb-0">Update your personal details, study goals, and security password.</p>
+        <p class="text-muted small mb-0">Customize your avatar, personal details, study goals, and security password.</p>
     </div>
 </div>
 
-<!-- Profile Overview Card with Symbol Logo -->
+<!-- Profile Overview Card -->
 <div class="custom-card mb-4 p-4 border-0 shadow-sm" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(6, 182, 212, 0.1));">
     <div class="row align-items-center">
         <div class="col-md-7 d-flex align-items-center">
-            <!-- User Symbol Logo -->
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 70px; height: 70px; min-width: 70px;">
-                <i class="bi bi-person-fill fs-1"></i>
-            </div>
+            
+            <!-- Avatar Display -->
+            {% if current_user.profile_image and current_user.profile_image.startswith('user_') %}
+                <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_image) }}" 
+                     alt="Profile Picture" class="rounded-circle me-3 border border-3 border-white shadow-sm" 
+                     style="width: 75px; height: 75px; object-fit: cover;">
+            {% else %}
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                     style="width: 75px; height: 75px; min-width: 75px; font-size: 2.2rem;">
+                    {% if current_user.profile_image == 'avatar-2' %}🤖
+                    {% elif current_user.profile_image == 'avatar-3' %}💻
+                    {% elif current_user.profile_image == 'avatar-4' %}🚀
+                    {% elif current_user.profile_image == 'avatar-5' %}🧠
+                    {% elif current_user.profile_image == 'avatar-6' %}⚡
+                    {% else %}🎓{% endif %}
+                </div>
+            {% endif %}
+
             <div>
                 <h4 class="fw-bold mb-1">{{ current_user.name }}</h4>
                 <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i>{{ current_user.email }}</p>
@@ -52,20 +66,75 @@
 </div>
 
 <div class="row g-4">
-    <!-- 1. Update Profile Form -->
-    <div class="col-lg-6">
+    <!-- 1. Update Profile & Avatar Form -->
+    <div class="col-lg-7">
         <div class="custom-card h-100">
             <div class="d-flex align-items-center mb-3">
                 <div class="bg-primary-subtle text-primary p-2 rounded-3 me-2">
-                    <i class="bi bi-person-gear fs-5"></i>
+                    <i class="bi bi-person-bounding-box fs-5"></i>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-0">Update Personal Details</h5>
-                    <small class="text-muted">Edit your name, email, and target study velocity</small>
+                    <h5 class="fw-bold mb-0">Choose Avatar or Upload Photo</h5>
+                    <small class="text-muted">Pick a student persona or upload your custom picture</small>
                 </div>
             </div>
 
-            <form method="POST" action="{{ url_for('profile') }}">
+            <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                
+                <!-- 6 Preset Avatars Grid -->
+                <label class="form-label small fw-semibold mb-2">1. Choose a Student Avatar:</label>
+                <div class="row g-2 mb-3">
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-1' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-1" class="d-none" {% if current_user.profile_image == 'avatar-1' %}checked{% endif %}>
+                            <div class="fs-2">🎓</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">Scholar</small>
+                        </label>
+                    </div>
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-2' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-2" class="d-none" {% if current_user.profile_image == 'avatar-2' %}checked{% endif %}>
+                            <div class="fs-2">🤖</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">AI Bot</small>
+                        </label>
+                    </div>
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-3' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-3" class="d-none" {% if current_user.profile_image == 'avatar-3' %}checked{% endif %}>
+                            <div class="fs-2">💻</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">Coder</small>
+                        </label>
+                    </div>
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-4' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-4" class="d-none" {% if current_user.profile_image == 'avatar-4' %}checked{% endif %}>
+                            <div class="fs-2">🚀</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">Rocket</small>
+                        </label>
+                    </div>
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-5' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-5" class="d-none" {% if current_user.profile_image == 'avatar-5' %}checked{% endif %}>
+                            <div class="fs-2">🧠</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">Thinker</small>
+                        </label>
+                    </div>
+                    <div class="col-4 col-sm-2 text-center">
+                        <label class="d-block p-2 border rounded-3 text-center cursor-pointer {% if current_user.profile_image == 'avatar-6' %}border-primary bg-primary-subtle{% endif %}" style="cursor: pointer;">
+                            <input type="radio" name="selected_avatar" value="avatar-6" class="d-none" {% if current_user.profile_image == 'avatar-6' %}checked{% endif %}>
+                            <div class="fs-2">⚡</div>
+                            <small class="d-block text-truncate" style="font-size: 0.7rem;">Prodigy</small>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Photo Upload -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">2. Or Upload Your Own Photo (Optional):</label>
+                    <input type="file" name="profile_pic" class="form-control form-control-sm" accept="image/*">
+                    <small class="text-muted" style="font-size: 0.75rem;">Supports JPG, PNG, WEBP.</small>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Full Name</label>
                     <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
@@ -74,7 +143,6 @@
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Email Address</label>
                     <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
-                    <small class="text-muted">Used for login and authentication.</small>
                 </div>
 
                 <div class="mb-4">
@@ -83,18 +151,17 @@
                         <input type="number" step="0.5" min="0.5" max="16.0" name="study_goal_hours" class="form-control" value="{{ current_user.study_goal_hours }}" required>
                         <span class="input-group-text">Hours / Day</span>
                     </div>
-                    <small class="text-muted">AI engine uses this to calculate daily Pomodoro intervals.</small>
                 </div>
 
                 <button type="submit" name="update_profile" value="1" class="btn btn-primary w-100 py-2 fw-semibold">
-                    <i class="bi bi-check2-circle me-1"></i> Save Profile Changes
+                    <i class="bi bi-check2-circle me-1"></i> Save Changes & Avatar
                 </button>
             </form>
         </div>
     </div>
 
     <!-- 2. Change Password Form -->
-    <div class="col-lg-6">
+    <div class="col-lg-5">
         <div class="custom-card h-100">
             <div class="d-flex align-items-center mb-3">
                 <div class="bg-warning-subtle text-warning p-2 rounded-3 me-2">
@@ -131,4 +198,18 @@
         </div>
     </div>
 </div>
+
+<script>
+// Avatar selection highlight script
+document.querySelectorAll('input[name="selected_avatar"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('input[name="selected_avatar"]').forEach(r => {
+            r.closest('label').classList.remove('border-primary', 'bg-primary-subtle');
+        });
+        if (this.checked) {
+            this.closest('label').classList.add('border-primary', 'bg-primary-subtle');
+        }
+    });
+});
+</script>
 {% endblock %}

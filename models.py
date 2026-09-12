@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password = db.Column(db.String(255), nullable=False)
     study_goal_hours = db.Column(db.Float, default=4.0)
+    profile_image = db.Column(db.String(255), default='avatar-1')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     subjects = db.relationship('Subject', backref='user', lazy=True, cascade="all, delete-orphan")
