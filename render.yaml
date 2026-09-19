@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ai-study-planner
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+
+      - key: FLASK_DEBUG
+        value: "false"
+
+      - key: TURSO_DATABASE_URL
+        sync: false
+
+      - key: TURSO_AUTH_TOKEN
+        sync: false

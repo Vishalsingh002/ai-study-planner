@@ -1,7 +1,10 @@
 ﻿import os
 import uuid
-import sqlite3
+import cloudinary
+from cloudinary.uploader import upload
 from datetime import datetime, date, timedelta
+from dotenv import load_dotenv
+from sqlalchemy import text
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Subject, Task, Progress
@@ -9,9 +12,33 @@ from forms import (RegistrationForm, LoginForm, SubjectForm, TaskForm,
                    ProgressLogForm, ProfileForm, ChangePasswordForm)
 from utils.recommendation_engine import AIStudyRecommendationEngine
 
+
+load_dotenv()  # local dev ke liye .env file se env vars load karega; Render pe ye no-op rahega
+
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'study-planner-secret-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-insecure-secret-change-me')
+
+# --- Database config: Turso (libSQL) agar env vars set hain, warna local SQLite fallback ---
+TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')   # e.g. libsql://your-db-name.turso.io
+TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
+
+if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
+    # libsql:// prefix hata ke sqlite+libsql:// dialect banate hain (sqlalchemy-libsql ka format)
+    clean_url = TURSO_DATABASE_URL.replace('libsql://', '').replace('https://', '')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?secure=true'
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': {'auth_token': TURSO_AUTH_TOKEN}
+    }
+else:
+    # Local development fallback — Turso set nahi hai to normal sqlite file use hogi
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -25,20 +52,15 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Auto-add profile_image column if missing in SQLite
+# Auto-add profile_image column if missing (works for local SQLite AND Turso/libSQL)
 with app.app_context():
     db.create_all()
     try:
-        db_path = os.path.join(app.root_path, 'database.db')
-        if os.path.exists(db_path):
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cursor.execute("PRAGMA table_info(users)")
-            cols = [col[1] for col in cursor.fetchall()]
+        with db.engine.connect() as conn:
+            cols = [row[1] for row in conn.execute(text("PRAGMA table_info(users)"))]
             if 'profile_image' not in cols:
-                cursor.execute("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'")
+                conn.execute(text("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'"))
                 conn.commit()
-            conn.close()
     except Exception as e:
         print(f"Auto-migration: {e}")
 
@@ -396,14 +418,21 @@ def profile():
                 if file and file.filename != '':
                     allowed_exts = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
                     ext = file.filename.rsplit('.', 1)[-1].lower()
+                    # if ext in allowed_exts:
+                    #     unique_filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+                    #     upload_folder = os.path.join(app.root_path, 'static', 'profile_pics')
+                    #     os.makedirs(upload_folder, exist_ok=True)
+                    #     file.save(os.path.join(upload_folder, unique_filename))
+                    #     current_user.profile_image = unique_filename
                     if ext in allowed_exts:
-                        unique_filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
-                        upload_folder = os.path.join(app.root_path, 'static', 'profile_pics')
-                        os.makedirs(upload_folder, exist_ok=True)
-                        file.save(os.path.join(upload_folder, unique_filename))
-                        current_user.profile_image = unique_filename
-                    else:
-                        flash('Invalid image format. Supported: PNG, JPG, WEBP.', 'warning')
+                       result = upload(
+                          file,
+                          folder="ai-study-planner/profile"
+                        )
+
+                    current_user.profile_image = result["secure_url"]
+                else:
+                    flash('Invalid image format. Supported: PNG, JPG, WEBP.', 'warning')
 
             current_user.name = new_name
             current_user.email = new_email
@@ -442,4 +471,6 @@ def change_password():
     return redirect(url_for('profile'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

@@ -15,11 +15,12 @@
         <div class="col-md-7 d-flex align-items-center">
             
             <!-- Avatar Display -->
-            {% if current_user.profile_image and current_user.profile_image.startswith('user_') %}
-                <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_image) }}" 
-                     alt="Profile Picture" class="rounded-circle me-3 border border-3 border-white shadow-sm" 
+            {% if current_user.profile_image and current_user.profile_image.startswith('http') %}
+                 <img src="{{ current_user.profile_image }}"
+                     alt="Profile Picture"
+                     class="rounded-circle me-3 border border-3 border-white shadow-sm"
                      style="width: 75px; height: 75px; object-fit: cover;">
-            {% else %}
+           {% else %}
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
                      style="width: 75px; height: 75px; min-width: 75px; font-size: 2.2rem;">
                     {% if current_user.profile_image == 'avatar-2' %}🤖
