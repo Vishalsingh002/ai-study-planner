@@ -45,9 +45,10 @@ if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
     
     clean_token = TURSO_AUTH_TOKEN.strip()
     # Format required by sqlalchemy-libsql for secure Turso connections:
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}/?authToken={clean_token}&secure=true'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?authToken={clean_token}&secure=true'
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_pre_ping': True
+        'pool_pre_ping': True,
+        'pool_recycle': 3600
     }
 else:
     # Local development fallback — Turso set nahi hai to normal sqlite file use hogi
