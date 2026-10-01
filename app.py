@@ -39,16 +39,26 @@ TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
 if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
     try:
         import sqlalchemy_libsql  # noqa: F401 - verify dialect driver is installed
-        clean_url = TURSO_DATABASE_URL.strip()
+        clean_url = TURSO_DATABASE_URL.strip().strip('"').strip("'")
         for prefix in ('libsql://', 'https://', 'http://'):
             if clean_url.startswith(prefix):
                 clean_url = clean_url[len(prefix):]
         clean_url = clean_url.rstrip('/')
         
-        clean_token = TURSO_AUTH_TOKEN.strip()
-        # Format required by sqlalchemy-libsql for secure Turso connections:
-        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}/?authToken={clean_token}&secure=true'
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+        clean_token = TURSO_AUTH_TOKEN.strip().strip('"').strip("'")
+        if clean_token.startswith("Bearer "):
+            clean_token = clean_token[len("Bearer "):].strip()
+        
+        if clean_url and clean_token:
+            # Format required by sqlalchemy-libsql for secure Turso connections:
+            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?secure=true'
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+                'connect_args': {
+                    'auth_token': clean_token,
+                }
+            }
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     except Exception as err:
         print(f"Notice: Turso dialect unavailable or error ({err}). Falling back to local SQLite.")
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
