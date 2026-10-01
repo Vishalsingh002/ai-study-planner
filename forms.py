@@ -18,8 +18,8 @@ class RegistrationForm(FlaskForm):
                 raise ValidationError('Email is already registered. Please login or use another.')
         except ValidationError:
             raise
-        except Exception as e:
-            raise ValidationError(f'Database error: {str(e)}')
+        except Exception:
+            pass
 
 
 class LoginForm(FlaskForm):

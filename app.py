@@ -93,6 +93,14 @@ with app.app_context():
                 print(f"Table inspection notice: {pe}")
     except Exception as e:
         print(f"Database startup notice / auto-migration: {e}")
+        if app.config['SQLALCHEMY_DATABASE_URI'] != 'sqlite:///database.db':
+            print("Notice: Primary database connection failed. Falling back to local SQLite.")
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+            try:
+                db.create_all()
+            except Exception as e2:
+                print(f"Fallback SQLite error: {e2}")
     finally:
         try:
             db.engine.dispose()
