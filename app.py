@@ -68,15 +68,15 @@ def load_user(user_id):
 
 # Auto-add profile_image column if missing (works for local SQLite AND Turso/libSQL)
 with app.app_context():
-    db.create_all()
     try:
+        db.create_all()
         with db.engine.connect() as conn:
             cols = [row[1] for row in conn.execute(text("PRAGMA table_info(users)"))]
             if 'profile_image' not in cols:
                 conn.execute(text("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'"))
                 conn.commit()
     except Exception as e:
-        print(f"Auto-migration: {e}")
+        print(f"Database startup notice / auto-migration: {e}")
 
 # --- Landing & Auth ---
 
