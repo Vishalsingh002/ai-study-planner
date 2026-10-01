@@ -37,19 +37,24 @@ TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')   # e.g. libsql://your
 TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
 
 if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
-    clean_url = TURSO_DATABASE_URL.strip()
-    for prefix in ('libsql://', 'https://', 'http://'):
-        if clean_url.startswith(prefix):
-            clean_url = clean_url[len(prefix):]
-    clean_url = clean_url.rstrip('/')
-    
-    clean_token = TURSO_AUTH_TOKEN.strip()
-    # Format required by sqlalchemy-libsql for secure Turso connections:
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?authToken={clean_token}&secure=true'
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_pre_ping': True,
-        'pool_recycle': 3600
-    }
+    try:
+        import sqlalchemy_libsql  # noqa: F401 - verify dialect driver is installed
+        clean_url = TURSO_DATABASE_URL.strip()
+        for prefix in ('libsql://', 'https://', 'http://'):
+            if clean_url.startswith(prefix):
+                clean_url = clean_url[len(prefix):]
+        clean_url = clean_url.rstrip('/')
+        
+        clean_token = TURSO_AUTH_TOKEN.strip()
+        # Format required by sqlalchemy-libsql for secure Turso connections:
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}/?authToken={clean_token}&secure=true'
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_pre_ping': True,
+            'pool_recycle': 3600
+        }
+    except Exception as err:
+        print(f"Notice: Turso dialect unavailable or error ({err}). Falling back to local SQLite.")
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 else:
     # Local development fallback — Turso set nahi hai to normal sqlite file use hogi
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -72,10 +77,13 @@ with app.app_context():
     try:
         db.create_all()
         with db.engine.connect() as conn:
-            cols = [row[1] for row in conn.execute(text("PRAGMA table_info(users)"))]
-            if 'profile_image' not in cols:
-                conn.execute(text("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'"))
-                conn.commit()
+            try:
+                cols = [row[1] for row in conn.execute(text("PRAGMA table_info(users)"))]
+                if cols and 'profile_image' not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'"))
+                    conn.commit()
+            except Exception as pe:
+                print(f"Table inspection notice: {pe}")
     except Exception as e:
         print(f"Database startup notice / auto-migration: {e}")
 
@@ -93,26 +101,35 @@ def register():
         return redirect(url_for('dashboard'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(
-            name=form.name.data.strip(),
-            email=form.email.data.lower().strip()
-        )
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = User(
+                name=form.name.data.strip(),
+                email=form.email.data.lower().strip()
+            )
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
 
-        # Seed initial subjects
-        default_subjects = [
-            ("Machine Learning", "#4f46e5"),
-            ("Data Structures & Algorithms", "#06b6d4"),
-            ("Operating Systems", "#10b981")
-        ]
-        for name, color in default_subjects:
-            db.session.add(Subject(user_id=user.id, subject_name=name, color=color))
-        db.session.commit()
+            # Seed initial subjects
+            default_subjects = [
+                ("Machine Learning", "#4f46e5"),
+                ("Data Structures & Algorithms", "#06b6d4"),
+                ("Operating Systems", "#10b981")
+            ]
+            for name, color in default_subjects:
+                db.session.add(Subject(user_id=user.id, subject_name=name, color=color))
+            db.session.commit()
 
-        flash('Account created successfully! You can now log in.', 'success')
-        return redirect(url_for('login'))
+            flash('Account created successfully! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Registration error: {e}")
+            flash('Error creating account. Please verify database connection or try another email.', 'danger')
+    elif request.method == 'POST' and form.errors:
+        for field, errors in form.errors.items():
+            for err in errors:
+                flash(f"{err}", 'danger')
     return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
