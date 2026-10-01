@@ -153,4 +153,4 @@ Instead of complex black-box machine learning, this application utilizes **Heuri
 
 ## 👨‍💻 Author
 
-Built with ❤️ by **Vishal Singh** as an Academic / Portfolio Project.
+Built with ❤️ by **Vishal Raj** as an Academic / Portfolio Project.

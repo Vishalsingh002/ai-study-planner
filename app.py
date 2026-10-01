@@ -15,25 +15,39 @@ from utils.recommendation_engine import AIStudyRecommendationEngine
 
 load_dotenv()  # local dev ke liye .env file se env vars load karega; Render pe ye no-op rahega
 
-cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-    secure=True
-)
+# Cloudinary configuration (if environment variables are present)
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+
+is_cloudinary_configured = bool(CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+if is_cloudinary_configured:
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True
+    )
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-insecure-secret-change-me')
 
-# --- Database config: Turso (libSQL) agar env vars set hain, warna local SQLite fallback ---
+# --- Database config: Turso (libSQL) if env vars set, else local SQLite fallback ---
 TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')   # e.g. libsql://your-db-name.turso.io
 TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
 
 if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
-    # libsql:// prefix hata ke sqlite+libsql:// dialect banate hain (sqlalchemy-libsql ka format)
-    clean_url = TURSO_DATABASE_URL.replace('libsql://', '').replace('https://', '')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?secure=true'
+    clean_url = TURSO_DATABASE_URL.strip()
+    for prefix in ('libsql://', 'https://', 'http://'):
+        if clean_url.startswith(prefix):
+            clean_url = clean_url[len(prefix):]
+    clean_url = clean_url.rstrip('/')
+    
+    clean_token = TURSO_AUTH_TOKEN.strip()
+    # Format required by sqlalchemy-libsql for secure Turso connections:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}/?authToken={clean_token}&secure=true'
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {'auth_token': TURSO_AUTH_TOKEN}
+        'pool_pre_ping': True
     }
 else:
     # Local development fallback — Turso set nahi hai to normal sqlite file use hogi
@@ -446,15 +460,22 @@ def profile():
                     allowed_exts = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
                     ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
                     if ext in allowed_exts:
-                        try:
-                            result = upload(
-                                file,
-                                folder="ai-study-planner/profile"
-                            )
-                            if result and "secure_url" in result:
-                                current_user.profile_image = result["secure_url"]
-                        except Exception as e:
-                            flash(f'Image upload warning: {str(e)}', 'warning')
+                        if is_cloudinary_configured:
+                            try:
+                                result = upload(
+                                    file,
+                                    folder="ai-study-planner/profile"
+                                )
+                                if result and "secure_url" in result:
+                                    current_user.profile_image = result["secure_url"]
+                            except Exception as e:
+                                flash(f'Cloudinary upload warning: {str(e)}', 'warning')
+                        else:
+                            unique_filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+                            upload_folder = os.path.join(app.root_path, 'static', 'profile_pics')
+                            os.makedirs(upload_folder, exist_ok=True)
+                            file.save(os.path.join(upload_folder, unique_filename))
+                            current_user.profile_image = unique_filename
                     else:
                         flash('Invalid image format. Supported formats: PNG, JPG, JPEG, WEBP, GIF.', 'warning')
 

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}My Profile & Settings{% endblock %}
 
 {% block content %}
@@ -17,6 +17,11 @@
             <!-- Avatar Display -->
             {% if current_user.profile_image and current_user.profile_image.startswith('http') %}
                  <img src="{{ current_user.profile_image }}"
+                     alt="Profile Picture"
+                     class="rounded-circle me-3 border border-3 border-white shadow-sm"
+                     style="width: 75px; height: 75px; object-fit: cover;">
+            {% elif current_user.profile_image and current_user.profile_image.startswith('user_') %}
+                 <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_image) }}"
                      alt="Profile Picture"
                      class="rounded-circle me-3 border border-3 border-white shadow-sm"
                      style="width: 75px; height: 75px; object-fit: cover;">
