@@ -1,4 +1,4 @@
-﻿import os
+import os
 import uuid
 import cloudinary
 from cloudinary.uploader import upload
@@ -9,7 +9,7 @@ from flask import Flask, render_template, redirect, url_for, flash, request, jso
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Subject, Task, Progress
 from forms import (RegistrationForm, LoginForm, SubjectForm, TaskForm, 
-                   ProgressLogForm, ProfileForm, ChangePasswordForm)
+                   ProgressLogForm, ProfileForm, ChangePasswordForm, ContactForm)
 from utils.recommendation_engine import AIStudyRecommendationEngine
 
 
@@ -122,6 +122,33 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
+
+# --- Public Marketing & Legal Pages ---
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form = ContactForm()
+    if request.method == 'GET' and current_user.is_authenticated:
+        form.name.data = current_user.name
+        form.email.data = current_user.email
+
+    if form.validate_on_submit():
+        flash(f'Thank you, {form.name.data}! Your message has been received. Our academic support team will respond to {form.email.data} within 24 hours.', 'success')
+        return redirect(url_for('contact'))
+
+    return render_template('contact.html', form=form)
 
 # --- Dashboard ---
 
@@ -417,22 +444,19 @@ def profile():
                 file = request.files['profile_pic']
                 if file and file.filename != '':
                     allowed_exts = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
-                    ext = file.filename.rsplit('.', 1)[-1].lower()
-                    # if ext in allowed_exts:
-                    #     unique_filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
-                    #     upload_folder = os.path.join(app.root_path, 'static', 'profile_pics')
-                    #     os.makedirs(upload_folder, exist_ok=True)
-                    #     file.save(os.path.join(upload_folder, unique_filename))
-                    #     current_user.profile_image = unique_filename
+                    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
                     if ext in allowed_exts:
-                       result = upload(
-                          file,
-                          folder="ai-study-planner/profile"
-                        )
-
-                    current_user.profile_image = result["secure_url"]
-                else:
-                    flash('Invalid image format. Supported: PNG, JPG, WEBP.', 'warning')
+                        try:
+                            result = upload(
+                                file,
+                                folder="ai-study-planner/profile"
+                            )
+                            if result and "secure_url" in result:
+                                current_user.profile_image = result["secure_url"]
+                        except Exception as e:
+                            flash(f'Image upload warning: {str(e)}', 'warning')
+                    else:
+                        flash('Invalid image format. Supported formats: PNG, JPG, JPEG, WEBP, GIF.', 'warning')
 
             current_user.name = new_name
             current_user.email = new_email

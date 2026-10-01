@@ -1,67 +1,607 @@
 {% extends "base.html" %}
-{% block title %}Smart AI Study Management{% endblock %}
+{% block title %}StudyAI - Intelligent Academic Study Planner & Pomodoro Engine{% endblock %}
 
 {% block public_content %}
-<div class="container py-5">
-    <div class="row align-items-center py-5">
-        <div class="col-lg-6 mb-5 mb-lg-0">
-            <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill mb-3">
-                <i class="bi bi-stars"></i> Rule-Based Intelligent Study Engine
-            </span>
-            <h1 class="display-4 fw-bold mb-3">Supercharge Your Study Velocity with AI.</h1>
-            <p class="lead text-muted mb-4">
-                Engineered for engineering students. StudyAI analyzes upcoming deadlines, priority weights, and subject completion lag to build an optimized daily study schedule.
-            </p>
-            <div class="d-flex flex-wrap gap-3">
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
-                    Start Planning Free <i class="bi bi-arrow-right ms-2"></i>
-                </a>
-                <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4">
-                    Member Login
-                </a>
-            </div>
-            <div class="row mt-5 pt-3 border-top text-muted">
-                <div class="col-4">
-                    <h4 class="fw-bold text-dark mb-0">100%</h4>
-                    <small>Heuristic Driven</small>
+<!-- Hero Section -->
+<section class="hero-glow-bg py-5">
+    <div class="container py-lg-5">
+        <div class="row align-items-center gy-5">
+            <!-- Left Hero Content -->
+            <div class="col-lg-6">
+                <!--<div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary-subtle text-primary border border-primary-subtle mb-3 small fw-semibold">
+                    <i class="bi bi-stars"></i>
+                    <span>Version 2.4 Live • Heuristic Decision Engine</span>
+                </div> -->
+                
+                <h1 class="display-4 fw-extrabold mb-3" style="font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;">
+                    Master College Deadlines with <span class="text-gradient">Intelligent AI Planning</span>.
+                </h1>
+                
+                <p class="lead text-muted mb-4 fs-6" style="line-height: 1.8;">
+                    Overcome deadline anxiety and academic burnout. StudyAI mathematically balances syllabus completion deficits and imminent exam deadlines into structured, high-retention 50-minute Pomodoro study sessions.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="{{ url_for('register') }}" class="btn btn-gradient-primary btn-lg px-4 py-2 text-white shadow-sm d-flex align-items-center gap-2">
+                        <span>Start Planning Free</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4 py-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Member Sign In</span>
+                    </a>
                 </div>
-                <div class="col-4">
-                    <h4 class="fw-bold text-dark mb-0">Pomodoro</h4>
-                    <small>Auto Time-Blocks</small>
-                </div>
-                <div class="col-4">
-                    <h4 class="fw-bold text-dark mb-0">Streaks</h4>
-                    <small>Habit Building</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4 p-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-cpu me-2"></i>Live AI Recommendation Engine</h6>
-                    <span class="badge bg-success-subtle text-success">Active Heuristic</span>
-                </div>
-                <div class="p-3 bg-light rounded-3 mb-3 border">
-                    <div class="d-flex justify-content-between small text-muted mb-1">
-                        <span>Top Recommended Subject</span>
-                        <span class="text-primary fw-semibold">UDI: 87.4</span>
+
+                <!-- Trust Micro-Metrics -->
+                <div class="row pt-4 border-top g-3">
+                    <div class="col-4">
+                        <div class="fw-bold fs-4 text-primary">100%</div>
+                        <small class="text-muted" style="font-size: 0.78rem;">Transparent Math</small>
                     </div>
-                    <h5 class="fw-bold mb-1">Machine Learning</h5>
-                    <p class="small text-muted mb-0">Critical deficit identified: 2 upcoming assignments due in 48 hours.</p>
-                </div>
-                <div class="p-3 bg-light rounded-3 border">
-                    <h6 class="small fw-semibold text-muted mb-2">Automated Focus Blocks</h6>
-                    <div class="d-flex align-items-center justify-content-between small mb-1">
-                        <span>09:00 AM - 09:45 AM</span>
-                        <span class="badge bg-primary">ML Feature Engineering</span>
+                    <div class="col-4">
+                        <div class="fw-bold fs-4 text-success">50/10</div>
+                        <small class="text-muted" style="font-size: 0.78rem;">Pomodoro Focus</small>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <span>09:45 AM - 09:55 AM</span>
-                        <span class="badge bg-success">Cognitive Rest</span>
+                    <div class="col-4">
+                        <div class="fw-bold fs-4 text-warning">🔥 Habits</div>
+                        <small class="text-muted" style="font-size: 0.78rem;">Streak Psychology</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Hero Preview Widget -->
+            <div class="col-lg-6">
+                <div class="preview-card-floating">
+                    <div class="custom-card shadow-lg p-4 border-0 position-relative" style="background: var(--card-bg); border-radius: 1.5rem;">
+                        
+                        <!-- Top Header Bar -->
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <div class="brand-logo-icon me-2" style="width: 32px; height: 32px; border-radius: 8px;">
+                                    <i class="bi bi-cpu-fill text-white fs-6"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Daily Focus Roadmap</h6>
+                                    <small class="text-muted">Today • AI Priority Active</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill">
+                                🔥 14 Day Streak
+                            </span>
+                        </div>
+
+                        <!-- Top AI Recommendation Pill -->
+                        <div class="p-3 rounded-3 mb-3 border bg-body-tertiary">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-primary-subtle text-primary" style="font-size: 0.7rem;">Top Priority Subject</span>
+                                <span class="text-primary fw-bold small">UDI Score: 92.4</span>
+                            </div>
+                            <h6 class="fw-bold mb-1">Machine Learning & Neural Networks</h6>
+                            <p class="text-muted small mb-0">2 assignments due within 48h with syllabus completion at only 38%.</p>
+                        </div>
+
+                        <!-- Scheduled Pomodoro Blocks -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold text-muted text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Auto-Generated Pomodoro Blocks</span>
+                                <span class="badge bg-success-subtle text-success small">Target: 4.0 hrs</span>
+                            </div>
+
+                            <div class="schedule-block mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold small">Backpropagation Math Review</div>
+                                        <small class="text-muted"><i class="bi bi-clock me-1"></i>09:00 AM - 09:50 AM</small>
+                                    </div>
+                                    <span class="badge bg-primary">50 Mins</span>
+                                </div>
+                            </div>
+
+                            <div class="schedule-block break mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold small text-success">Cognitive Rest & Hydration</div>
+                                        <small class="text-muted"><i class="bi bi-cup-hot me-1"></i>09:50 AM - 10:00 AM</small>
+                                    </div>
+                                    <span class="badge bg-success">10 Mins Break</span>
+                                </div>
+                            </div>
+
+                            <div class="schedule-block mb-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold small">Graph Algorithms & Dynamic Programming</div>
+                                        <small class="text-muted"><i class="bi bi-clock me-1"></i>10:00 AM - 10:50 AM</small>
+                                    </div>
+                                    <span class="badge bg-info text-dark">50 Mins</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar Simulation -->
+                        <div class="pt-2">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Today's Target Completed</span>
+                                <span class="fw-semibold text-primary">75% (3.0 / 4.0h)</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 75%"></div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Trust Banner -->
+<section class="py-4 border-top border-bottom bg-body-tertiary text-center">
+    <div class="container">
+        <p class="text-muted small text-uppercase fw-semibold mb-3" style="letter-spacing: 0.08em;">
+            Engineered For University Students, Engineering Majors, & Competitive Exam Aspirants
+        </p>
+        <div class="row row-cols-2 row-cols-md-4 g-3 align-items-center text-muted fw-semibold">
+            <div class="col"><i class="bi bi-mortarboard fs-5 me-2 text-primary"></i>Computer Science</div>
+            <div class="col"><i class="bi bi-gear-wide-connected fs-5 me-2 text-info"></i>Engineering & STEM</div>
+            <div class="col"><i class="bi bi-clipboard2-data fs-5 me-2 text-success"></i>Data Science & AI</div>
+            <div class="col"><i class="bi bi-journal-medical fs-5 me-2 text-danger"></i>Medical & Entrance Exams</div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem vs Solution Section -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-5">
+                <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill mb-2 fw-semibold">The Student Problem</span>
+                <h2 class="fw-bold mb-3">Why Traditional To-Do Lists Fail College Students.</h2>
+                <p class="text-muted" style="line-height: 1.8;">
+                    Generic note apps treat all tasks equally. They don't know that your Machine Learning exam is in 3 days, or that you've only finished 20% of your Data Structures syllabus.
+                </p>
+                <div class="d-flex flex-column gap-3 mt-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-x-circle-fill text-danger fs-5 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Decision Paralysis</h6>
+                            <small class="text-muted">Spending 30 minutes every morning just wondering what to study first.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-x-circle-fill text-danger fs-5 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Unrealistic 12-Hour Cramming</h6>
+                            <small class="text-muted">Leading directly to cognitive fatigue, zero retention, and burnout.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-x-circle-fill text-danger fs-5 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Broken Study Consistency</h6>
+                            <small class="text-muted">No feedback loop or streak counter to make studying a daily habit.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="p-4 p-md-5 rounded-4 shadow-sm border bg-body" style="border-left: 5px solid var(--primary-color) !important;">
+                    <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill mb-2 fw-semibold">The StudyAI Solution</span>
+                    <h3 class="fw-bold mb-3">The Science of Heuristic Planning.</h3>
+                    <p class="text-muted mb-4">
+                        StudyAI substitutes chaotic guesswork with a multi-criteria heuristic scoring engine. It continuously calculates urgency weights and automatically structures your day into manageable Pomodoro focus blocks.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-body-tertiary border h-100">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <h6 class="fw-bold mb-0">Urgency Deficit Index</h6>
+                                </div>
+                                <small class="text-muted">Dynamically ranks weak subjects and approaching deadlines to the top of your queue.</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-body-tertiary border h-100">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <h6 class="fw-bold mb-0">Habit Streaks 🔥</h6>
+                                </div>
+                                <small class="text-muted">Gamifies daily effort so you never break your active chain of study days.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Features Grid -->
+<section id="features" class="py-5 bg-body-tertiary">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Engineered For Performance</span>
+            <h2 class="fw-bold display-6 mb-3">Everything You Need to Ace Your Semesters.</h2>
+            <p class="text-muted lead fs-6">
+                A purpose-built ecosystem combining productivity science, interactive data visualization, and transparent algorithmic scheduling.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-primary-subtle text-primary">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Urgency & Deficit Index (UDI)</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Our heuristic AI algorithm cross-references deadline proximity with syllabus completion gaps, guaranteeing that you never ignore an urgent assignment.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-success-subtle text-success">
+                        <i class="bi bi-stopwatch-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Automated Pomodoro Timetable</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Input your target daily hours and get an automatic schedule of 50-minute intense focus blocks interspersed with 10-minute cognitive rest breaks.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-danger-subtle text-danger">
+                        <i class="bi bi-fire"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Daily Study Streak Tracker</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Stay relentlessly consistent. Log your sessions to build a continuous streak counter that rewards commitment and sparks motivation.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-info-subtle text-info">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Interactive Chart.js Analytics</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Inspect your study velocity with weekly bar charts, 30-day consistency trend lines, task distribution doughnuts, and subject completion meters.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-warning-subtle text-warning">
+                        <i class="bi bi-tags-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Color-Coded Subject Manager</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Organize your university courses with custom pastel badges, priority tags (High 🔥, Medium ⚡, Low ☕), and 1-click completion toggles.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-box">
+                    <div class="feature-icon-wrapper bg-purple-subtle text-secondary" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Sleek Dark Mode & Cloud Sync</h5>
+                    <p class="text-muted small mb-0" style="line-height: 1.7;">
+                        Study comfortably late into the night with high-contrast Dark Mode. Your progress syncs smoothly across devices backed by Turso & Cloudinary.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works 3-Step Section -->
+<section id="how-it-works" class="py-5">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill fw-semibold mb-2">Streamlined Workflow</span>
+            <h2 class="fw-bold display-6 mb-3">How StudyAI Works in 3 Simple Steps.</h2>
+            <p class="text-muted lead fs-6">
+                No complex onboarding. Get your first optimized daily study roadmap in under two minutes.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Step 1 -->
+            <div class="col-lg-4">
+                <div class="custom-card text-center p-4 h-100">
+                    <div class="step-number-badge mb-3">1</div>
+                    <h5 class="fw-bold mb-2">Add Courses & Tasks</h5>
+                    <p class="text-muted small mb-0">
+                        Create your semester subjects, assign priority tags, and add upcoming assignment deadlines and estimated hours.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-lg-4">
+                <div class="custom-card text-center p-4 h-100">
+                    <div class="step-number-badge mb-3">2</div>
+                    <h5 class="fw-bold mb-2">AI Calculates Urgency</h5>
+                    <p class="text-muted small mb-0">
+                        The heuristic algorithm evaluates deadline proximity and syllabus lag to generate a customized 50/10 Pomodoro timetable.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-lg-4">
+                <div class="custom-card text-center p-4 h-100">
+                    <div class="step-number-badge mb-3">3</div>
+                    <h5 class="fw-bold mb-2">Log Hours & Elevate Streaks</h5>
+                    <p class="text-muted small mb-0">
+                        Execute your study sessions, mark tasks complete with 1 click, log your daily hours, and watch your habit streak climb.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Explainable AI Spotlight Section (Viva / College Credibility) -->
+<section id="philosophy" class="py-5 bg-body-tertiary">
+    <div class="container py-4">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-6">
+                <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Academic Transparency</span>
+                <h2 class="fw-bold mb-3">Why Rule-Based AI Outperforms Black-Box ML for Students.</h2>
+                <p class="text-muted" style="line-height: 1.8;">
+                    Unlike generative chatbots that can hallucinate or complex deep learning models whose reasoning cannot be audited, StudyAI relies on <strong>Multi-Criteria Decision Analysis (MCDA)</strong>:
+                </p>
+                <div class="p-3 bg-body rounded-3 border mb-3">
+                    <code class="text-primary fw-bold">UDI Score = (Syllabus Deficit × 45) + (Task Urgency × 0.55) + Overdue Penalty</code>
+                    <p class="small text-muted mb-0 mt-2">Every recommendation is 100% explainable, deterministic, and tailored directly to your college schedule.</p>
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-primary btn-sm">Read Full Architectural Overview</a>
+                    <a href="javascript:void(0)" class="btn btn-link btn-sm text-decoration-none text-muted">
+                        <i class="bi bi-github me-1"></i>View Source Code
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="custom-card p-3 h-100">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-3 mb-2"></i>
+                            <h6 class="fw-bold mb-1">Instant Execution</h6>
+                            <small class="text-muted">Zero latency API calls. Operates in real-time right inside your browser session.</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="custom-card p-3 h-100">
+                            <i class="bi bi-shield-check text-success fs-3 mb-2"></i>
+                            <h6 class="fw-bold mb-1">Total Data Privacy</h6>
+                            <small class="text-muted">Your study notes and schedules are never used to train third-party AI models.</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="custom-card p-3 h-100">
+                            <i class="bi bi-award-fill text-primary fs-3 mb-2"></i>
+                            <h6 class="fw-bold mb-1">Viva-Proof Logic</h6>
+                            <small class="text-muted">Defend every recommendation formula effortlessly in college project presentations.</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="custom-card p-3 h-100">
+                            <i class="bi bi-battery-charging text-info fs-3 mb-2"></i>
+                            <h6 class="fw-bold mb-1">Fatigue Prevention</h6>
+                            <small class="text-muted">Mandatory 10-minute rest buffers scientifically preserve long-term working memory.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Student Testimonials Section -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-warning-subtle text-warning px-3 py-1 rounded-pill fw-semibold mb-2">Real Student Results</span>
+            <h2 class="fw-bold display-6 mb-3">Loved by Students Across Engineering Colleges.</h2>
+            <p class="text-muted lead fs-6">See how StudyAI helped students stop procrastinating and achieve semester breakthroughs.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Testimonial 1 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="text-warning mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-muted small mb-4" style="line-height: 1.7;">
+                        "Before StudyAI, I always left my Operating Systems lab assignments for the last night. The UDI priority index literally forced me to tackle weak modules first. Saved my semester GPA!"
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 42px; height: 42px;">
+                            AK
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Aman Kumar</h6>
+                            <small class="text-muted">B.Tech CSE, 3rd Year</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="text-warning mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-muted small mb-4" style="line-height: 1.7;">
+                        "The 50/10 Pomodoro schedule builder is a game-changer. I used to sit for 4 hours and absorb almost nothing. Now I do four focused 50-minute chunks and my retention is dramatically higher."
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 42px; height: 42px;">
+                            PR
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Priya Rawat</h6>
+                            <small class="text-muted">GATE Aspirant & ECE Graduate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="text-warning mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-muted small mb-4" style="line-height: 1.7;">
+                        "The habit streak counter is addicting in the best way possible. I'm currently on a 28-day study streak and refuse to let it drop. The dark mode is super clean too!"
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 42px; height: 42px;">
+                            RS
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Rohan Sharma</h6>
+                            <small class="text-muted">Data Science Student</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Interactive FAQ Accordion -->
+<section class="py-5 bg-body-tertiary">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Got Questions?</span>
+            <h2 class="fw-bold display-6 mb-3">Frequently Asked Questions.</h2>
+            <p class="text-muted lead fs-6">Everything you need to know about StudyAI's planning engine and student account.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    
+                    <!-- FAQ 1 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                How does the AI recommendation engine decide what I should study?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted small" style="line-height: 1.8;">
+                                StudyAI uses our proprietary Urgency & Deficit Index (UDI). It computes deadline proximity scores (overdue tasks get critical priority, while tasks due today or tomorrow receive strong priority multipliers) and weighs them against your current syllabus completion rate for each course. Subjects with the lowest completion and the most pressing deadlines rise directly to the top.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Is StudyAI 100% free to use for students?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted small" style="line-height: 1.8;">
+                                Yes! StudyAI was built as an open academic initiative by Vishu Singh. There are no paywalls, no hidden premium tiers, and no credit cards required. All features including Analytics, Pomodoro Timetables, and Streak tracking are completely accessible to every registered student.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                How does the Pomodoro focus block schedule work?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted small" style="line-height: 1.8;">
+                                You define your daily study target (e.g. 4 hours) in your Profile Settings. StudyAI automatically carves that time into 50-minute intense study sprints paired with mandatory 10-minute rest buffers. Higher-urgency tasks are allocated to the earliest focus windows to ensure critical assignments are conquered first.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                Is my academic and personal data secure?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted small" style="line-height: 1.8;">
+                                Absolutely. All passwords are encrypted with industry-standard Werkzeug salted hashes. Each user's database records are strictly isolated. We do not run third-party advertising scripts or sell user activity. For full details, view our <a href="{{ url_for('privacy') }}" class="text-primary text-decoration-none">Privacy Policy</a>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="accordion-item border rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                Can I access StudyAI on my smartphone or tablet?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted small" style="line-height: 1.8;">
+                                Yes! StudyAI is built with a responsive Bootstrap 5 interface featuring an off-canvas drawer navigation and mobile-optimized touch controls so you can log your hours or check your Pomodoro schedule anywhere on campus.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final Call-To-Action Banner -->
+<section class="py-5 text-white position-relative" style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);">
+    <div class="container py-4 text-center">
+        <h2 class="display-6 fw-bold mb-3">Ready to Reclaim Your Academic Focus?</h2>
+        <p class="lead mb-4 mx-auto" style="max-width: 600px; opacity: 0.95;">
+            Join hundreds of motivated students who manage their subjects, conquer deadlines, and maintain unbroken study streaks with StudyAI.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 py-2 text-primary fw-bold shadow">
+                Create Free Student Account <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+            <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg px-4 py-2 fw-semibold">
+                Learn More About StudyAI
+            </a>
+        </div>
+        <div class="mt-3 small opacity-75">
+            <i class="bi bi-check-circle-fill me-1"></i> 100% Free Forever • No Credit Card Required • Instant Setup
+        </div>
+    </div>
+</section>
 {% endblock %}

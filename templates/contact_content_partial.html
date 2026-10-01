@@ -1,0 +1,158 @@
+<!-- Contact Page Content -->
+<div class="page-header-banner text-center mb-5">
+    <div class="container">
+        <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Student & Academic Support</span>
+        <h1 class="fw-extrabold display-5 mb-3" style="font-weight: 800;">
+            We'd Love to <span class="text-gradient">Hear From You</span>.
+        </h1>
+        <p class="lead text-muted mx-auto fs-6" style="max-width: 680px; line-height: 1.8;">
+            Have a feature suggestion, found a bug, or interested in deploying StudyAI for your college study group? Reach out directly to our team.
+        </p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4 gy-5">
+        
+        <!-- Left: Contact Form -->
+        <div class="col-lg-7">
+            <div class="custom-card p-4 p-md-5">
+                <h4 class="fw-bold mb-1">Send Us a Direct Message</h4>
+                <p class="text-muted small mb-4">Fill out the form below and we'll reply to your email within 24 hours.</p>
+
+                <form method="POST" action="{{ url_for('contact') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row g-3">
+                        <!-- Full Name -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Your Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
+                                {{ form.name(class="form-control border-start-0 ps-0" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Rahul Verma") }}
+                            </div>
+                            {% for error in form.name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-envelope-fill"></i></span>
+                                {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Inquiry Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-tag-fill"></i></span>
+                                {{ form.category(class="form-select border-start-0 ps-0") }}
+                            </div>
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Subject Line</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-chat-left-text-fill"></i></span>
+                                {{ form.subject(class="form-control border-start-0 ps-0" + (" is-invalid" if form.subject.errors else ""), placeholder="e.g. Suggestion for Google Calendar export") }}
+                            </div>
+                            {% for error in form.subject.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Message -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Detailed Message</label>
+                            {{ form.message(class="form-control" + (" is-invalid" if form.message.errors else ""), rows="5", placeholder="Describe your question, issue, or feedback in detail...") }}
+                            {% for error in form.message.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="col-12 mt-4">
+                            {{ form.submit(class="btn btn-gradient-primary w-100 py-2 fs-6 shadow-sm") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Direct Support Channels & Info -->
+        <div class="col-lg-5">
+            <div class="d-flex flex-column gap-4">
+                
+                <!-- Support Channels Card -->
+                <div class="custom-card p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-headset text-primary me-2"></i>Official Support Channels</h5>
+                    
+                    <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+                        <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+                            <i class="bi bi-envelope-at-fill"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Academic Inquiries & Support</span>
+                            <a href="mailto:support@studyai.internal" class="fw-semibold text-decoration-none text-primary">support@studyai.internal</a>
+                            <small class="text-muted d-block mt-1">Average response time: &lt; 24 hours</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+                        <div class="stat-icon-wrapper bg-info-subtle text-info">
+                            <i class="bi bi-github"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Open Source Repository & Bug Tracker</span>
+                            <a href="javascript:void(0)" class="fw-semibold text-decoration-none text-info">
+                                GitHub Issues & Discussions &rarr;
+                            </a>
+                            <small class="text-muted d-block mt-1">Submit bug reports or inspect code</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="stat-icon-wrapper bg-success-subtle text-success">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+                        <div>
+                            <span class="small text-muted d-block">Lead Developer & Author</span>
+                            <span class="fw-semibold">Vishu Singh</span>
+                            <small class="text-muted d-block mt-1">Built with ❤️ for student productivity</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Quick Assist -->
+                <div class="custom-card p-4 bg-body-tertiary">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-question-circle-fill text-warning me-2"></i>Looking for Quick Answers?</h6>
+                    <p class="text-muted small mb-3">
+                        Most common questions about our Urgency & Deficit Index (UDI) formulas, Pomodoro generation, and account safety are answered in our FAQ.
+                    </p>
+                    <a href="{{ url_for('index') }}#faqAccordion" class="btn btn-outline-secondary btn-sm">
+                        Browse FAQs on Home Page &rarr;
+                    </a>
+                </div>
+
+                <!-- Response Commitment Badge -->
+                <div class="p-3 rounded-3 border bg-body d-flex align-items-center gap-3">
+                    <i class="bi bi-shield-check text-success fs-2"></i>
+                    <div>
+                        <div class="fw-bold small">Zero Spam Guaranteed</div>
+                        <small class="text-muted">We will only use your email to directly answer your specific inquiry.</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

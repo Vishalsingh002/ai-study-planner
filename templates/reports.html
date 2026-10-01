@@ -1,54 +1,160 @@
-﻿{% extends "base.html" %}
-{% block title %}Analytics{% endblock %}
+{% extends "base.html" %}
+{% block title %}Study Analytics & Performance - StudyAI{% endblock %}
+
 {% block content %}
-<h3 class="fw-bold mb-4">Study Analytics</h3>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold mb-1">Academic Analytics & Insights</h3>
+        <p class="text-muted small mb-0">Visual performance charts powered by Chart.js and AI deficit calculations.</p>
+    </div>
+    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+        <i class="bi bi-cpu-fill me-1"></i> Heuristic Evaluation Active
+    </span>
+</div>
 
 <div id="analyticsContainer">
+    <!-- Top Summary Metrics (4 Cards) -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="custom-card text-center">
-                <span class="text-muted small">Total Hours Logged</span>
-                <h3 class="fw-bold text-primary mt-1">{{ total_hours }} hrs</h3>
+        <div class="col-6 col-md-3">
+            <div class="custom-card text-center p-3">
+                <span class="text-muted small">Total Study Time</span>
+                <h3 class="fw-bold text-primary mt-1 mb-0">{{ total_hours }} <span class="fs-6 fw-normal text-muted">hrs</span></h3>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="custom-card text-center">
-                <span class="text-muted small">Completion Rate</span>
-                <h3 class="fw-bold text-success mt-1">{{ completion_rate }}%</h3>
+        <div class="col-6 col-md-3">
+            <div class="custom-card text-center p-3">
+                <span class="text-muted small">Completion Efficiency</span>
+                <h3 class="fw-bold text-success mt-1 mb-0">{{ completion_rate }}%</h3>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="custom-card text-center">
-                <span class="text-muted small">Finished Tasks</span>
-                <h3 class="fw-bold text-info mt-1">{{ completed_tasks }} / {{ total_tasks }}</h3>
+        <div class="col-6 col-md-3">
+            <div class="custom-card text-center p-3">
+                <span class="text-muted small">Tasks Finished</span>
+                <h3 class="fw-bold text-info mt-1 mb-0">{{ completed_tasks }} <span class="fs-6 fw-normal text-muted">/ {{ total_tasks }}</span></h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="custom-card text-center p-3">
+                <span class="text-muted small">Pending Backlog</span>
+                <h3 class="fw-bold text-warning mt-1 mb-0">{{ total_tasks - completed_tasks }}</h3>
             </div>
         </div>
     </div>
 
+    <!-- 4 Chart.js Interactive Graphs -->
     <div class="row g-4 mb-4">
+        <!-- 1. Weekly Study Hours -->
         <div class="col-lg-7">
-            <div class="custom-card" style="height: 350px;">
-                <h6 class="fw-bold mb-3">Weekly Study Hours vs Target</h6>
-                <div style="height: 270px;"><canvas id="weeklyStudyChart"></canvas></div>
+            <div class="custom-card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Weekly Study Hours vs Target</h6>
+                    <span class="badge bg-body-tertiary text-muted border small">Last 7 Days</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="weeklyStudyChart"></canvas>
+                </div>
             </div>
         </div>
+
+        <!-- 2. Task Breakdown Doughnut -->
         <div class="col-lg-5">
-            <div class="custom-card" style="height: 350px;">
-                <h6 class="fw-bold mb-3">Task Breakdown</h6>
-                <div style="height: 270px;"><canvas id="taskStatusChart"></canvas></div>
+            <div class="custom-card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart-fill text-info me-2"></i>Task Status Breakdown</h6>
+                    <span class="badge bg-body-tertiary text-muted border small">All Courses</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="taskStatusChart"></canvas>
+                </div>
             </div>
         </div>
+
+        <!-- 3. Subject Progress Bar Chart -->
         <div class="col-lg-6">
-            <div class="custom-card" style="height: 350px;">
-                <h6 class="fw-bold mb-3">Subject Completion %</h6>
-                <div style="height: 270px;"><canvas id="subjectProgressChart"></canvas></div>
+            <div class="custom-card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-layers-fill text-success me-2"></i>Syllabus Completion % by Subject</h6>
+                    <span class="badge bg-body-tertiary text-muted border small">Syllabus Progress</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="subjectProgressChart"></canvas>
+                </div>
             </div>
         </div>
+
+        <!-- 4. Monthly Trend Area Chart -->
         <div class="col-lg-6">
-            <div class="custom-card" style="height: 350px;">
-                <h6 class="fw-bold mb-3">30-Day Trend</h6>
-                <div style="height: 270px;"><canvas id="monthlyTrendChart"></canvas></div>
+            <div class="custom-card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-activity text-danger me-2"></i>30-Day Consistency Trend</h6>
+                    <span class="badge bg-body-tertiary text-muted border small">Habit Rhythm</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- AI Study Time Recommendations Table -->
+    <div class="custom-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-1"><i class="bi bi-cpu text-primary me-2"></i>AI Recommended Subject Time Re-allocation</h5>
+                <p class="text-muted small mb-0">Calculated dynamically to compensate for courses with low completion rates or approaching deadlines.</p>
+            </div>
+            <span class="badge bg-success-subtle text-success">Active Rebalancing</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Subject</th>
+                        <th>Current Completion</th>
+                        <th>AI Recommended Daily Target</th>
+                        <th>Priority Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in ai_recommendations %}
+                    <tr>
+                        <td>
+                            <span class="badge px-3 py-2 text-white" style="background-color: {{ rec.color }};">
+                                {{ rec.subject_name }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; width: 100px;">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ rec.completion_rate }}%; background-color: {{ rec.color }};"></div>
+                                </div>
+                                <span class="small fw-semibold">{{ rec.completion_rate }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-primary">{{ rec.suggested_hours }} hrs / day</span>
+                        </td>
+                        <td>
+                            {% if rec.completion_rate < 40 %}
+                                <span class="badge bg-danger-subtle text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Deficit Alert</span>
+                            {% elif rec.completion_rate < 70 %}
+                                <span class="badge bg-warning-subtle text-warning"><i class="bi bi-lightning-fill me-1"></i>Moderate Lag</span>
+                            {% else %}
+                                <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle-fill me-1"></i>On Track</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-check2-circle fs-3 text-success d-block mb-1"></i>
+                            All subject workloads are balanced. Create more tasks to generate AI re-allocations!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -1,98 +1,434 @@
-﻿{% extends "base.html" %}
-{% block title %}Create Account - StudyAI{% endblock %}
+{% extends "base.html" %}
+{% block title %}Create Free Account - StudyAI Academic Platform{% endblock %}
 
 {% block public_content %}
-<div class="container py-5">
-    <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
-        <div class="col-md-6 col-lg-5">
-            <div class="card border-0 shadow-lg rounded-4 p-4 p-sm-5 bg-body">
-                <!-- Header -->
-                <div class="text-center mb-4">
-                    <div class="bg-primary text-white d-inline-flex p-3 rounded-circle mb-3 shadow-sm" style="background: linear-gradient(135deg, #10b981, #06b6d4) !important;">
-                        <i class="bi bi-person-plus-fill fs-2"></i>
-                    </div>
-                    <h3 class="fw-bold mb-1">Create Account</h3>
-                    <p class="text-muted small">Join StudyAI & build a consistent study habit</p>
-                </div>
+<style>
+    /* Professional Split Auth Layout */
+    .auth-page-wrapper {
+        min-height: calc(100vh - 76px);
+        display: flex;
+        align-items: center;
+        background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.08) 0%, transparent 45%),
+                    radial-gradient(circle at 90% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+                    var(--bg-main);
+        padding: 2.5rem 1rem;
+    }
 
-                <form method="POST" action="{{ url_for('register') }}">
-                    {{ form.hidden_tag() }}
+    .auth-container-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
 
-                    <!-- Full Name -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Full Name</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
-                            {{ form.name(class="form-control border-start-0 ps-0" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Alex Kumar") }}
+    /* Left Brand Showcase Side */
+    .auth-showcase-side {
+        background: linear-gradient(145deg, #1e1b4b 0%, #0f172a 100%);
+        color: #ffffff;
+        padding: 3.5rem 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-showcase-side::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(79, 70, 229, 0.4) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .auth-showcase-side::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .auth-feature-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1rem;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.85rem;
+        backdrop-filter: blur(10px);
+        margin-bottom: 0.85rem;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .auth-feature-pill:hover {
+        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .pill-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Right Form Side */
+    .auth-form-side {
+        padding: 3.5rem 3rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .auth-showcase-side {
+            display: none;
+        }
+        .auth-form-side {
+            padding: 2.25rem 1.75rem;
+        }
+    }
+
+    /* Form Inputs & Controls */
+    .form-control-custom {
+        padding: 0.75rem 1rem;
+        border-radius: 0.65rem;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .form-control-custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .input-group-custom-text {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-right: none;
+        padding-left: 1rem;
+        padding-right: 0.5rem;
+        border-top-left-radius: 0.65rem;
+        border-bottom-left-radius: 0.65rem;
+    }
+
+    .input-group-custom-btn {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-left: none;
+        border-top-right-radius: 0.65rem;
+        border-bottom-right-radius: 0.65rem;
+    }
+    .input-group-custom-btn:hover {
+        color: var(--primary-color);
+        background-color: var(--card-bg);
+    }
+
+    .input-group:focus-within .input-group-custom-text,
+    .input-group:focus-within .input-group-custom-btn {
+        border-color: var(--primary-color);
+    }
+
+    /* Password Strength Indicator */
+    .strength-meter-bar {
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--border-color);
+        overflow: hidden;
+        margin-top: 6px;
+    }
+    .strength-meter-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* Gradient Register Button */
+    .btn-auth-submit {
+        background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+        border: none;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.85rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    .btn-auth-submit:hover {
+        opacity: 0.95;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -3px rgba(79, 70, 229, 0.4);
+        color: #ffffff;
+    }
+</style>
+
+<div class="auth-page-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-11 col-xxl-10">
+                <div class="auth-container-card">
+                    <div class="row g-0">
+                        
+                        <!-- Left: Brand Showcase & Value Proposition -->
+                        <div class="col-lg-5 auth-showcase-side">
+                            <div>
+                                <!-- Top Logo & Tag -->
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="brand-logo-icon shadow-sm">
+                                        <i class="bi bi-cpu-fill text-white fs-5"></i>
+                                    </div>
+                                    <h4 class="mb-0 fw-bold text-white">StudyAI</h4>
+                                    <span class="badge bg-success-subtle text-success ms-2 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Free Student Edition</span>
+                                </div>
+
+                                <h2 class="fw-bold mb-3 text-white" style="letter-spacing: -0.02em; line-height: 1.25;">
+                                    Start Mastering Your Academic Potential.
+                                </h2>
+                                <p class="text-white-50 small mb-4" style="line-height: 1.7;">
+                                    Join thousands of university students using algorithmic multi-criteria decision models to prioritize coursework and eliminate exam anxiety.
+                                </p>
+
+                                <!-- Value Pills -->
+                                <div class="mb-4">
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-primary text-white">
+                                            <i class="bi bi-diagram-3-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">Urgency & Deficit Index (UDI)</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">AI algorithm detects syllabus lag & deadline pressure</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-info text-white">
+                                            <i class="bi bi-clock-history"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">50/10 Pomodoro Scheduling</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Deep focus blocks balanced with brain recovery breaks</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-warning text-dark">
+                                            <i class="bi bi-fire"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">Study Streak Psychology 🔥</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Gamified daily streak counter builds unbreakable habits</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Student Testimonial Box -->
+                            <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="d-flex align-items-center gap-2 mb-2 text-warning" style="font-size: 0.8rem;">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                </div>
+                                <p class="text-white-50 fst-italic small mb-2" style="font-size: 0.8rem; line-height: 1.6;">
+                                    "I went from chaotic 2 AM cramming to steady 4-hour daily Pomodoros. My CGPA improved by 1.2 points in one semester!"
+                                </p>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <small class="text-white fw-semibold" style="font-size: 0.75rem;">Alex R. — Computer Engineering</small>
+                                    <span class="badge bg-success-subtle text-success" style="font-size: 0.65rem;">Verified Student</span>
+                                </div>
+                            </div>
                         </div>
-                        {% for error in form.name.errors %}
-                            <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
-                    </div>
 
-                    <!-- Email Address -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Email Address</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-envelope-fill"></i></span>
-                            {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                        <!-- Right: Professional Registration Form -->
+                        <div class="col-lg-7 auth-form-side">
+                            
+                            <!-- Header Bar -->
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2" style="font-size: 0.75rem;">
+                                        Quick 30-Second Setup
+                                    </span>
+                                    <h3 class="fw-bold mb-1">Create Student Account</h3>
+                                    <p class="text-muted small mb-0">Set up your free account to generate your first study timetable.</p>
+                                </div>
+                                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary rounded-circle d-none d-sm-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" title="Back to Home">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+
+                            <!-- Starter Pack Badge Callout -->
+                            <div class="p-3 rounded-3 mb-4 d-flex align-items-center gap-3 border" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(6, 182, 212, 0.05)); border-color: rgba(79, 70, 229, 0.2) !important;">
+                                <div class="text-primary fs-3">
+                                    <i class="bi bi-gift-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-primary small">Instant Student Starter Pack Included</div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                        Auto-configures 3 core subjects: <strong>Machine Learning</strong>, <strong>DSA</strong>, and <strong>Operating Systems</strong> upon sign-up.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Sign Up Form -->
+                            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                                {{ form.hidden_tag() }}
+
+                                <!-- Full Name -->
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        Full Name <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text input-group-custom-text">
+                                            <i class="bi bi-person-fill"></i>
+                                        </span>
+                                        {{ form.name(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Alex Kumar") }}
+                                    </div>
+                                    {% for error in form.name.errors %}
+                                        <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Email Address -->
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        Email Address <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text input-group-custom-text">
+                                            <i class="bi bi-envelope-fill"></i>
+                                        </span>
+                                        {{ form.email(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
+                                    </div>
+                                    {% for error in form.email.errors %}
+                                        <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <!-- Password with Real-time Strength Meter -->
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">
+                                                Password <span class="text-danger">*</span>
+                                            </label>
+                                            <span id="strengthText" class="small fw-semibold text-muted" style="font-size: 0.72rem;"></span>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text input-group-custom-text">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                            {{ form.password(class="form-control form-control-custom border-start-0 border-end-0 ps-2" + (" is-invalid" if form.password.errors else ""), id="regPassword", placeholder="At least 6 characters") }}
+                                            <button class="btn input-group-custom-btn" type="button" onclick="togglePasswordVisibility('regPassword', 'eyeIcon1')">
+                                                <i class="bi bi-eye-fill" id="eyeIcon1"></i>
+                                            </button>
+                                        </div>
+                                        <!-- Strength Progress Bar -->
+                                        <div class="strength-meter-bar">
+                                            <div class="strength-meter-fill" id="strengthBar"></div>
+                                        </div>
+                                        {% for error in form.password.errors %}
+                                            <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                                <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Confirm Password -->
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-secondary mb-1">
+                                            Confirm Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text input-group-custom-text">
+                                                <i class="bi bi-shield-check"></i>
+                                            </span>
+                                            {{ form.confirm_password(class="form-control form-control-custom border-start-0 border-end-0 ps-2" + (" is-invalid" if form.confirm_password.errors else ""), id="regConfirmPassword", placeholder="Repeat password") }}
+                                            <button class="btn input-group-custom-btn" type="button" onclick="togglePasswordVisibility('regConfirmPassword', 'eyeIcon2')">
+                                                <i class="bi bi-eye-fill" id="eyeIcon2"></i>
+                                            </button>
+                                        </div>
+                                        {% for error in form.confirm_password.errors %}
+                                            <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                                <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Trust Checklist -->
+                                <div class="row row-cols-2 g-2 mb-4 text-muted small" style="font-size: 0.78rem;">
+                                    <div class="col d-flex align-items-center gap-1">
+                                        <i class="bi bi-check2 text-success fw-bold"></i> 100% Free Forever
+                                    </div>
+                                    <div class="col d-flex align-items-center gap-1">
+                                        <i class="bi bi-check2 text-success fw-bold"></i> No Credit Card Needed
+                                    </div>
+                                    <div class="col d-flex align-items-center gap-1">
+                                        <i class="bi bi-check2 text-success fw-bold"></i> Salted Password Hash
+                                    </div>
+                                    <div class="col d-flex align-items-center gap-1">
+                                        <i class="bi bi-check2 text-success fw-bold"></i> Zero Ad Trackers
+                                    </div>
+                                </div>
+
+                                <!-- Register Button -->
+                                <button type="submit" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <span>Create My Account & Get Timetable</span>
+                                    <i class="bi bi-arrow-right-short fs-5"></i>
+                                </button>
+
+                                <!-- Terms & Privacy Agreement Notice -->
+                                <p class="small text-muted text-center mt-3 mb-0" style="font-size: 0.78rem; line-height: 1.6;">
+                                    By creating an account, you agree to our 
+                                    <a href="{{ url_for('terms') }}" class="text-primary text-decoration-none fw-semibold">Terms of Service</a> 
+                                    and acknowledge our 
+                                    <a href="{{ url_for('privacy') }}" class="text-primary text-decoration-none fw-semibold">Privacy Policy</a>.
+                                </p>
+                            </form>
+
+                            <!-- Switch to Login -->
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <p class="small text-muted mb-0">
+                                    Already have a student account? 
+                                    <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">
+                                        Sign In here &rarr;
+                                    </a>
+                                </p>
+                            </div>
+
                         </div>
-                        {% for error in form.email.errors %}
-                            <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
                     </div>
-
-                    <!-- Password with Eye Toggle -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-lock-fill"></i></span>
-                            {{ form.password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.password.errors else ""), id="regPassword", placeholder="At least 6 characters") }}
-                            <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('regPassword', 'eyeIcon2')">
-                                <i class="bi bi-eye-fill" id="eyeIcon2"></i>
-                            </button>
-                        </div>
-                        {% for error in form.password.errors %}
-                            <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Confirm Password with Eye Toggle -->
-                    <div class="mb-4">
-                        <label class="form-label small fw-semibold">Confirm Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i class="bi bi-shield-check"></i></span>
-                            {{ form.confirm_password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.confirm_password.errors else ""), id="regConfirmPassword", placeholder="Repeat password") }}
-                            <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('regConfirmPassword', 'eyeIcon3')">
-                                <i class="bi bi-eye-fill" id="eyeIcon3"></i>
-                            </button>
-                        </div>
-                        {% for error in form.confirm_password.errors %}
-                            <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Gradient Register Button -->
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm text-white" style="background: linear-gradient(135deg, #10b981, #06b6d4); border: none;">
-                        <i class="bi bi-rocket-takeoff-fill me-1"></i> Register Free
-                    </button>
-                </form>
-
-                <!-- Footer Switch Link -->
-                <div class="text-center mt-4 border-top pt-3">
-                    <p class="small text-muted mb-0">Already registered? 
-                        <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">Sign In here</a>
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Password Visibility & Strength Meter Script -->
 <script>
 function togglePasswordVisibility(fieldId, iconId) {
     const input = document.getElementById(fieldId);
     const icon = document.getElementById(iconId);
+    if (!input || !icon) return;
     if (input.type === 'password') {
         input.type = 'text';
         icon.className = 'bi bi-eye-slash-fill';
@@ -101,5 +437,46 @@ function togglePasswordVisibility(fieldId, iconId) {
         icon.className = 'bi bi-eye-fill';
     }
 }
+
+// Live Password Strength Evaluation
+document.addEventListener('DOMContentLoaded', () => {
+    const passInput = document.getElementById('regPassword');
+    const bar = document.getElementById('strengthBar');
+    const text = document.getElementById('strengthText');
+    if (!passInput || !bar || !text) return;
+
+    passInput.addEventListener('input', () => {
+        const val = passInput.value;
+        let score = 0;
+
+        if (val.length >= 6) score += 25;
+        if (val.length >= 10) score += 25;
+        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+        if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+
+        bar.style.width = score + '%';
+
+        if (val.length === 0) {
+            bar.style.width = '0%';
+            text.textContent = '';
+        } else if (score <= 25) {
+            bar.style.backgroundColor = '#ef4444';
+            text.textContent = 'Weak';
+            text.className = 'small fw-semibold text-danger';
+        } else if (score <= 50) {
+            bar.style.backgroundColor = '#f59e0b';
+            text.textContent = 'Fair';
+            text.className = 'small fw-semibold text-warning';
+        } else if (score <= 75) {
+            bar.style.backgroundColor = '#06b6d4';
+            text.textContent = 'Good';
+            text.className = 'small fw-semibold text-info';
+        } else {
+            bar.style.backgroundColor = '#10b981';
+            text.textContent = 'Strong 🔥';
+            text.className = 'small fw-semibold text-success';
+        }
+    });
+});
 </script>
 {% endblock %}

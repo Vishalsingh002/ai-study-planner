@@ -1,125 +1,357 @@
-﻿{% extends "base.html" %}
-{% block title %}Sign In - StudyAI{% endblock %}
+{% extends "base.html" %}
+{% block title %}Sign In - StudyAI Academic Platform{% endblock %}
 
 {% block public_content %}
 <style>
-    /* Premium Ambient Background */
-    .auth-bg {
-        min-height: calc(100vh - 80px);
-        background: radial-gradient(circle at 15% 25%, rgba(79, 70, 229, 0.12) 0%, transparent 45%),
-                    radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
-                    var(--bg-main);
+    /* Professional Split Auth Layout */
+    .auth-page-wrapper {
+        min-height: calc(100vh - 76px);
         display: flex;
         align-items: center;
-        justify-content: center;
+        background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.08) 0%, transparent 45%),
+                    radial-gradient(circle at 90% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+                    var(--bg-main);
         padding: 2.5rem 1rem;
     }
-    .auth-card {
+
+    .auth-container-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 1.5rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-        padding: 2.5rem;
-        transition: transform 0.3s ease;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
     }
-    .btn-gradient-signin {
-        background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%) !important;
-        border: none !important;
-        color: #ffffff !important;
-        font-weight: 600;
+
+    /* Left Brand Showcase Side */
+    .auth-showcase-side {
+        background: linear-gradient(145deg, #1e1b4b 0%, #0f172a 100%);
+        color: #ffffff;
+        padding: 3.5rem 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-showcase-side::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(79, 70, 229, 0.4) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .auth-showcase-side::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .auth-feature-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1rem;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.85rem;
+        backdrop-filter: blur(10px);
+        margin-bottom: 0.85rem;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .auth-feature-pill:hover {
+        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .pill-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Right Form Side */
+    .auth-form-side {
+        padding: 3.5rem 3rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .auth-showcase-side {
+            display: none;
+        }
+        .auth-form-side {
+            padding: 2.25rem 1.75rem;
+        }
+    }
+
+    /* Form Inputs & Controls */
+    .form-control-custom {
+        padding: 0.75rem 1rem;
+        border-radius: 0.65rem;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .form-control-custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .input-group-custom-text {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-right: none;
+        padding-left: 1rem;
+        padding-right: 0.5rem;
+        border-top-left-radius: 0.65rem;
+        border-bottom-left-radius: 0.65rem;
+    }
+
+    .input-group-custom-btn {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-left: none;
+        border-top-right-radius: 0.65rem;
+        border-bottom-right-radius: 0.65rem;
+    }
+    .input-group-custom-btn:hover {
+        color: var(--primary-color);
+        background-color: var(--card-bg);
+    }
+
+    .input-group:focus-within .input-group-custom-text,
+    .input-group:focus-within .input-group-custom-btn {
+        border-color: var(--primary-color);
+    }
+
+    /* Gradient Sign In Button */
+    .btn-auth-submit {
+        background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+        border: none;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.85rem 1.5rem;
+        border-radius: 0.75rem;
         transition: all 0.3s ease;
     }
-    .btn-gradient-signin:hover {
-        opacity: 0.92;
+    .btn-auth-submit:hover {
+        opacity: 0.95;
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 10px 20px -3px rgba(79, 70, 229, 0.4);
+        color: #ffffff;
     }
 </style>
 
-<div class="auth-bg">
+<div class="auth-page-wrapper">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 col-xl-4">
-                <div class="auth-card">
-                    
-                    <!-- Brand Icon & Header -->
-                    <div class="text-center mb-4">
-                        <div class="d-inline-flex p-3 rounded-circle mb-3 shadow-sm text-white" 
-                             style="background: linear-gradient(135deg, #4f46e5, #06b6d4);">
-                            <i class="bi bi-cpu-fill fs-2"></i>
-                        </div>
-                        <h3 class="fw-bold mb-1">Welcome Back</h3>
-                        <p class="text-muted small mb-0">Sign in to resume your study streak 🔥</p>
-                    </div>
+            <div class="col-xl-11 col-xxl-10">
+                <div class="auth-container-card">
+                    <div class="row g-0">
+                        
+                        <!-- Left: Brand Showcase & Student Habit Stats -->
+                        <div class="col-lg-5 auth-showcase-side">
+                            <div>
+                                <!-- Top Logo & Tag -->
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="brand-logo-icon shadow-sm">
+                                        <i class="bi bi-cpu-fill text-white fs-5"></i>
+                                    </div>
+                                    <h4 class="mb-0 fw-bold text-white">StudyAI</h4>
+                                    <span class="badge bg-primary-subtle text-primary ms-2 px-2 py-1 rounded-pill" style="font-size: 0.68rem;">Academic Portal</span>
+                                </div>
 
-                    <!-- Sign In Form -->
-                    <form method="POST" action="{{ url_for('login') }}">
-                        {{ form.hidden_tag() }}
+                                <h2 class="fw-bold mb-3 text-white" style="letter-spacing: -0.02em; line-height: 1.25;">
+                                    Welcome Back to Your Academic Command Center.
+                                </h2>
+                                <p class="text-white-50 small mb-4" style="line-height: 1.7;">
+                                    Ready to protect your study streak? Sign in to access your synchronized courses, deadline urgency scores, and automated Pomodoro blocks.
+                                </p>
 
-                        <!-- Email Input with Icon -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted">
-                                    <i class="bi bi-envelope-fill"></i>
-                                </span>
-                                {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu") }}
+                                <!-- Live Habit Motivation Pills -->
+                                <div class="mb-4">
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-danger text-white">
+                                            <i class="bi bi-fire"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">Protect Your Daily Streak</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Log at least 30 minutes today to maintain momentum</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-primary text-white">
+                                            <i class="bi bi-calendar2-week-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">AI Schedule Generator</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Dynamic 50-minute study slots optimized for upcoming exams</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="auth-feature-pill">
+                                        <div class="pill-icon bg-success text-white">
+                                            <i class="bi bi-bar-chart-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white small">Syllabus Completion Meter</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Live visual analytics powered by Chart.js</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {% for error in form.email.errors %}
-                                <div class="text-danger small mt-1">{{ error }}</div>
-                            {% endfor %}
+
+                            <!-- Bottom Quote Box -->
+                            <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="d-flex align-items-center gap-2 mb-2 text-warning" style="font-size: 0.8rem;">
+                                    <i class="bi bi-shield-lock-fill text-success"></i>
+                                    <span class="text-white fw-semibold small">Secure Session & Data Isolation</span>
+                                </div>
+                                <p class="text-white-50 small mb-0" style="font-size: 0.78rem; line-height: 1.6;">
+                                    Your academic records, subject notes, and daily progress logs are strictly confidential and encrypted with Werkzeug security.
+                                </p>
+                            </div>
                         </div>
 
-                        <!-- Password Input with Eye Toggle -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-body-tertiary border-end-0 text-muted">
-                                    <i class="bi bi-lock-fill"></i>
-                                </span>
-                                {{ form.password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.password.errors else ""), id="loginPassword", placeholder="••••••••") }}
-                                <button class="btn btn-outline-secondary border-start-0 bg-body-tertiary text-muted" type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')">
-                                    <i class="bi bi-eye-fill" id="eyeIconLogin"></i>
+                        <!-- Right: Professional Sign In Form -->
+                        <div class="col-lg-7 auth-form-side">
+                            
+                            <!-- Header Bar -->
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2" style="font-size: 0.75rem;">
+                                        Student Sign In
+                                    </span>
+                                    <h3 class="fw-bold mb-1">Welcome Back 👋</h3>
+                                    <p class="text-muted small mb-0">Enter your credentials to resume your study sessions.</p>
+                                </div>
+                                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-secondary rounded-circle d-none d-sm-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" title="Back to Home">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+
+                            <!-- Sign In Form -->
+                            <form method="POST" action="{{ url_for('login') }}">
+                                {{ form.hidden_tag() }}
+
+                                <!-- Email Address -->
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        Email Address <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text input-group-custom-text">
+                                            <i class="bi bi-envelope-fill"></i>
+                                        </span>
+                                        {{ form.email(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
+                                    </div>
+                                    {% for error in form.email.errors %}
+                                        <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Password with Eye Toggle -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="form-label small fw-semibold text-secondary mb-1">
+                                            Password <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text input-group-custom-text">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                        {{ form.password(class="form-control form-control-custom border-start-0 border-end-0 ps-2" + (" is-invalid" if form.password.errors else ""), id="loginPassword", placeholder="Enter your account password") }}
+                                        <button class="btn input-group-custom-btn" type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')">
+                                            <i class="bi bi-eye-fill" id="eyeIconLogin"></i>
+                                        </button>
+                                    </div>
+                                    {% for error in form.password.errors %}
+                                        <div class="text-danger small mt-1 d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Remember Me Option -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        {{ form.remember(class="form-check-input", id="rememberMeCheck") }}
+                                        <label class="form-check-label small text-muted user-select-none" for="rememberMeCheck">
+                                            Keep me logged in for 30 days
+                                        </label>
+                                    </div>
+                                    <a href="{{ url_for('contact') }}" class="small text-decoration-none text-primary" style="font-size: 0.8rem;">
+                                        Need help?
+                                    </a>
+                                </div>
+
+                                <!-- Sign In Button -->
+                                <button type="submit" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <span>Sign In & Open Dashboard</span>
+                                    <i class="bi bi-arrow-right-short fs-5"></i>
                                 </button>
+                            </form>
+
+                            <!-- Trust Badges Row -->
+                            <div class="row row-cols-2 g-2 mt-4 pt-3 border-top text-muted small" style="font-size: 0.78rem;">
+                                <div class="col d-flex align-items-center gap-1">
+                                    <i class="bi bi-shield-check text-success fw-bold"></i> 256-Bit SSL Secured
+                                </div>
+                                <div class="col d-flex align-items-center gap-1">
+                                    <i class="bi bi-database-check text-primary fw-bold"></i> Cloud Synchronized
+                                </div>
                             </div>
-                            {% for error in form.password.errors %}
-                                <div class="text-danger small mt-1">{{ error }}</div>
-                            {% endfor %}
-                        </div>
 
-                        <!-- Remember Me Checkbox -->
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div class="form-check">
-                                {{ form.remember(class="form-check-input") }}
-                                {{ form.remember.label(class="form-check-label small text-muted") }}
+                            <!-- Switch to Register -->
+                            <div class="text-center mt-4 pt-2">
+                                <p class="small text-muted mb-0">
+                                    New to StudyAI? 
+                                    <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">
+                                        Create Free Student Account &rarr;
+                                    </a>
+                                </p>
                             </div>
+
                         </div>
-
-                        <!-- Gradient Sign In Button -->
-                        <button type="submit" class="btn btn-gradient-signin w-100 py-2 rounded-3 shadow-sm">
-                            Sign In <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
-                    </form>
-
-                    <!-- Switch to Register Link -->
-                    <div class="text-center mt-4 border-top pt-3">
-                        <p class="small text-muted mb-0">Don't have an account? 
-                            <a href="{{ url_for('register') }}" class="text-primary fw-bold text-decoration-none">
-                                Create Account
-                            </a>
-                        </p>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Password Visibility Helper -->
 <script>
 function togglePasswordVisibility(fieldId, iconId) {
     const input = document.getElementById(fieldId);
     const icon = document.getElementById(iconId);
+    if (!input || !icon) return;
     if (input.type === 'password') {
         input.type = 'text';
         icon.className = 'bi bi-eye-slash-fill';

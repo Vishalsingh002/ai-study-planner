@@ -1,4 +1,4 @@
-﻿# 🎓 AI Study Planner Web Application
+# 🎓 AI Study Planner Web Application
 
 A smart, modern, and easy-to-use academic study management web app built with **Python (Flask)**, **SQLite**, **Bootstrap 5**, and **Chart.js**.
 
@@ -82,14 +82,18 @@ ai_study_planner/
 │   └── js/main.js             # Chart.js initializers & checkbox toggles
 │
 └── templates/                 # Frontend HTML pages
-    ├── base.html              # Base layout with sidebar & streak badge
-    ├── index.html             # Landing showcase page
+    ├── base.html              # Base layout with sidebar, SaaS navbar & footer
+    ├── index.html             # High-conversion SaaS landing showcase page
+    ├── about.html             # Mission, science & author profile
+    ├── terms.html             # Legal Terms of Service & academic honor code
+    ├── privacy.html           # GDPR-style student privacy policy
+    ├── contact.html           # Interactive support & collaboration form
     ├── login.html             # Modern Sign In page with eye toggle
-    ├── register.html          # Sign Up page with validation
+    ├── register.html          # Sign Up page with validation & terms agreement
     ├── dashboard.html         # Main student dashboard & Pomodoro timetable
     ├── planner.html           # Task & subject manager
-    ├── reports.html           # Analytics & visual charts
-    └── profile.html           # Profile settings & daily goal adjuster
+    ├── reports.html           # Analytics, visual charts & AI rebalancing
+    └── profile.html           # Profile settings, avatar & daily goal adjuster
 \\\
 
 ---
@@ -149,4 +153,4 @@ Instead of complex black-box machine learning, this application utilizes **Heuri
 
 ## 👨‍💻 Author
 
-Built with ❤️ by **Vishu Singh** as an Academic / Portfolio Project.
+Built with ❤️ by **Vishal Singh** as an Academic / Portfolio Project.

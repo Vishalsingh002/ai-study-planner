@@ -10,30 +10,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Theme Management (Light / Dark)
 function initThemeToggle() {
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    if (!themeToggleBtn) return;
-
     const currentTheme = localStorage.getItem('study_theme') || 'light';
     document.documentElement.setAttribute('data-bs-theme', currentTheme);
     updateThemeIcon(currentTheme);
 
-    themeToggleBtn.addEventListener('click', () => {
-        const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-bs-theme', theme);
-        localStorage.setItem('study_theme', theme);
-        updateThemeIcon(theme);
+    const toggleButtons = [
+        document.getElementById('themeToggleBtn'),
+        document.getElementById('themeToggleBtnPublic')
+    ].filter(Boolean);
+
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const activeTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', activeTheme);
+            localStorage.setItem('study_theme', activeTheme);
+            updateThemeIcon(activeTheme);
+        });
     });
 }
 
 function updateThemeIcon(theme) {
-    const icon = document.querySelector('#themeToggleBtn i');
-    if (icon) {
+    const icons = document.querySelectorAll('#themeToggleBtn i, #themeToggleBtnPublic i');
+    icons.forEach(icon => {
         if (theme === 'dark') {
             icon.className = 'bi bi-sun-fill text-warning';
         } else {
             icon.className = 'bi bi-moon-stars-fill text-secondary';
         }
-    }
+    });
 }
 
 // Chart.js Analytics Initializer

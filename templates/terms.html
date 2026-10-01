@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service - StudyAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    {% include "terms_content_partial.html" %}
+</div>
+{% endblock %}
+
+{% block public_content %}
+<div class="py-0">
+    {% include "terms_content_partial.html" %}
+</div>
+{% endblock %}

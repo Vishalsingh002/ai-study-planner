@@ -81,3 +81,18 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
     confirm_new_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password', message="New passwords must match")])
     submit = SubmitField('Update Password')
+
+
+class ContactForm(FlaskForm):
+    name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=100)])
+    email = StringField('Email Address', validators=[DataRequired(), Email()])
+    category = SelectField('Inquiry Category', choices=[
+        ('general', 'General Inquiry 💬'),
+        ('feedback', 'Product Feedback & Suggestion 💡'),
+        ('bug', 'Report a Bug 🐞'),
+        ('academic', 'College / Academic Collaboration 🎓')
+    ], default='general')
+    subject = StringField('Subject', validators=[DataRequired(), Length(min=3, max=150)])
+    message = TextAreaField('Your Message', validators=[DataRequired(), Length(min=10, max=2000)])
+    submit = SubmitField('Send Message 🚀')
+
