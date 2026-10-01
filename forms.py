@@ -12,9 +12,14 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Create Account')
 
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data.lower().strip()).first()
-        if user:
-            raise ValidationError('Email is already registered. Please login or use another.')
+        try:
+            user = User.query.filter_by(email=email.data.lower().strip()).first()
+            if user:
+                raise ValidationError('Email is already registered. Please login or use another.')
+        except ValidationError:
+            raise
+        except Exception as e:
+            raise ValidationError(f'Database error: {str(e)}')
 
 
 class LoginForm(FlaskForm):

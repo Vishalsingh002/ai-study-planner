@@ -48,10 +48,7 @@ if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
         clean_token = TURSO_AUTH_TOKEN.strip()
         # Format required by sqlalchemy-libsql for secure Turso connections:
         app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}/?authToken={clean_token}&secure=true'
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'pool_pre_ping': True,
-            'pool_recycle': 3600
-        }
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
     except Exception as err:
         print(f"Notice: Turso dialect unavailable or error ({err}). Falling back to local SQLite.")
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -86,6 +83,11 @@ with app.app_context():
                 print(f"Table inspection notice: {pe}")
     except Exception as e:
         print(f"Database startup notice / auto-migration: {e}")
+    finally:
+        try:
+            db.engine.dispose()
+        except Exception:
+            pass
 
 # --- Landing & Auth ---
 
