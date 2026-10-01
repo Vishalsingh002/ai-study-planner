@@ -128,7 +128,7 @@ def register():
             )
             user.set_password(form.password.data)
             db.session.add(user)
-            db.session.commit()
+            db.session.flush()
 
             # Seed initial subjects
             default_subjects = [

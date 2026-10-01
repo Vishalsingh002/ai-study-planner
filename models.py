@@ -1,4 +1,4 @@
-﻿from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,13 +20,13 @@ class User(UserMixin, db.Model):
     progress_records = db.relationship('Progress', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
-        self.password = generate_password_hash(password)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256:50000')
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
     def get_study_streak(self):
-        records = Progress.query.filter_by(user_id=self.id).filter(Progress.study_hours > 0).order_by(Progress.date.desc()).all()
+        records = Progress.query.filter_by(user_id=self.id).filter(Progress.study_hours > 0).order_by(Progress.date.desc()).limit(60).all()
         if not records:
             return 0
 
