@@ -4,10 +4,15 @@ import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-def _send_async_email_task(mail_server, mail_port, mail_user, mail_pass, use_tls, msg):
+def _send_async_email_task(mail_server, mail_port, mail_user, mail_pass, use_tls, msg, reset_url):
     try:
         if not mail_user or not mail_pass:
-            print(f"[MAIL NOTICE] SMTP credentials not set in environment. Reset email would be sent to: {msg.get('To')}")
+            print("\n" + "="*70)
+            print(f"[MAIL NOTICE] SMTP credentials not set in .env / Environment.")
+            print(f"Target Email: {msg.get('To')}")
+            print(f"[DEV RESET LINK] Open this link in your browser to reset password:")
+            print(f"{reset_url}")
+            print("="*70 + "\n")
             return
 
         server = smtplib.SMTP(mail_server, mail_port, timeout=12)
@@ -19,6 +24,7 @@ def _send_async_email_task(mail_server, mail_port, mail_user, mail_pass, use_tls
         print(f"[MAIL SUCCESS] Password reset email successfully sent to {msg.get('To')}")
     except Exception as e:
         print(f"[MAIL ERROR] Failed to send email to {msg.get('To')}: {e}")
+        print(f"[FALLBACK LINK] Use this reset link directly: {reset_url}")
 
 def send_reset_email(recipient_email, recipient_name, reset_url):
     """
@@ -107,7 +113,7 @@ The StudyAI Team
     # Launch daemon background thread to send email without blocking HTTP worker
     thread = threading.Thread(
         target=_send_async_email_task,
-        args=(mail_server, mail_port, mail_user, mail_pass, use_tls, msg),
+        args=(mail_server, mail_port, mail_user, mail_pass, use_tls, msg, reset_url),
         daemon=True
     )
     thread.start()
