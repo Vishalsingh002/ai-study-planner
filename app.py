@@ -32,59 +32,23 @@ if is_cloudinary_configured:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-insecure-secret-change-me')
 
-# --- Database config: PostgreSQL / Turso (libSQL) / Local SQLite ---
+# --- Database config: PostgreSQL (Render) / Local SQLite ---
 DATABASE_URL = os.environ.get('DATABASE_URL')
-TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')
-TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
-
-selected_uri = 'sqlite:///database.db'
-engine_options = {}
 
 if DATABASE_URL:
     # Standard Render PostgreSQL fix (postgres:// -> postgresql://)
     clean_db_url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    selected_uri = clean_db_url
-    engine_options = {
+    app.config['SQLALCHEMY_DATABASE_URI'] = clean_db_url
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
         'pool_recycle': 300,
     }
     print("Database: Using PostgreSQL database.")
-elif TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
-    try:
-        clean_url = TURSO_DATABASE_URL.strip().strip('"').strip("'")
-        for prefix in ('libsql://', 'https://', 'http://'):
-            if clean_url.startswith(prefix):
-                clean_url = clean_url[len(prefix):]
-        clean_url = clean_url.rstrip('/')
-        
-        clean_token = TURSO_AUTH_TOKEN.strip().strip('"').strip("'")
-        if clean_token.startswith("Bearer "):
-            clean_token = clean_token[len("Bearer "):].strip()
-        
-        if clean_url and clean_token:
-            # Pre-flight check: Test if Turso connection actually works BEFORE locking SQLAlchemy
-            from sqlalchemy import create_engine as test_create_engine
-            test_uri = f'sqlite+libsql://{clean_url}?secure=true'
-            test_eng = test_create_engine(test_uri, connect_args={'auth_token': clean_token})
-            with test_eng.connect() as test_c:
-                test_c.execute(text("SELECT 1"))
-            test_eng.dispose()
-
-            selected_uri = test_uri
-            engine_options = {
-                'connect_args': {'auth_token': clean_token},
-                'pool_pre_ping': True,
-            }
-            print("Database: Turso Cloud Database verified and connected.")
-    except Exception as err:
-        print(f"Notice: Turso pre-flight check failed ({err}). Safely falling back to local SQLite.")
-        selected_uri = 'sqlite:///database.db'
-        engine_options = {}
 else:
-    selected_uri = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+    print("Database: Using SQLite database.")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = selected_uri
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
