@@ -101,3 +101,14 @@ class ContactForm(FlaskForm):
     message = TextAreaField('Your Message', validators=[DataRequired(), Length(min=10, max=2000)])
     submit = SubmitField('Send Message 🚀')
 
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email Address', validators=[DataRequired(), Email()])
+    submit = SubmitField('Send Password Reset Link')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired(), Length(min=6, message="Password must be at least 6 characters")])
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('password', message="Passwords must match")])
+    submit = SubmitField('Reset Password & Log In')
+

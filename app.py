@@ -7,10 +7,13 @@ from dotenv import load_dotenv
 from sqlalchemy import text
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from models import db, User, Subject, Task, Progress
 from forms import (RegistrationForm, LoginForm, SubjectForm, TaskForm, 
-                   ProgressLogForm, ProfileForm, ChangePasswordForm, ContactForm)
+                   ProgressLogForm, ProfileForm, ChangePasswordForm, ContactForm,
+                   RequestResetForm, ResetPasswordForm)
 from utils.recommendation_engine import AIStudyRecommendationEngine
+from utils.mailer import send_reset_email
 
 
 load_dotenv()  # local dev ke liye .env file se env vars load karega; Render pe ye no-op rahega
@@ -153,6 +156,66 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
+
+# --- Password Reset Flow ---
+
+def get_reset_serializer():
+    return URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+def generate_reset_token(email):
+    s = get_reset_serializer()
+    return s.dumps(email, salt='studyai-password-reset')
+
+def verify_reset_token(token, max_age=900):
+    """Verifies timed token (default expiry: 15 minutes / 900 seconds)."""
+    s = get_reset_serializer()
+    try:
+        email = s.loads(token, salt='studyai-password-reset', max_age=max_age)
+        return email
+    except (SignatureExpired, BadSignature):
+        return None
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        submitted_email = form.email.data.lower().strip()
+        user = User.query.filter_by(email=submitted_email).first()
+        if user:
+            token = generate_reset_token(user.email)
+            reset_url = url_for('reset_password', token=token, _external=True)
+            send_reset_email(recipient_email=user.email, recipient_name=user.name, reset_url=reset_url)
+            flash(f"A password reset link has been dispatched to your registered email ({user.email}). Please check your inbox and spam folder. Link expires in 15 minutes.", 'success')
+            return redirect(url_for('login'))
+        else:
+            flash("No student account found with this email address. Please double-check your spelling or create a new account.", 'warning')
+    return render_template('forgot_password.html', form=form)
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    email = verify_reset_token(token, max_age=900)
+    if not email:
+        flash("The password reset link is invalid or has expired (valid for 15 minutes). Please request a new link.", 'danger')
+        return redirect(url_for('forgot_password'))
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash("Account not found. Please register or try again.", 'danger')
+        return redirect(url_for('forgot_password'))
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash("Your password has been reset successfully! You can now log in with your new password.", 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html', form=form, token=token)
 
 # --- Public Marketing & Legal Pages ---
 
