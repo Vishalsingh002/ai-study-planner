@@ -80,7 +80,7 @@ class AIStudyRecommendationEngine:
             if total == 0:
                 continue
 
-            completion_rate = completed_tasks / total
+            completion_rate = len(completed_tasks) / total
             deficit = 1.0 - completion_rate  # 0.0 to 1.0
 
             # Calculate urgency sum of pending tasks

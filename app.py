@@ -375,7 +375,8 @@ def log_progress():
             )
             db.session.add(record)
 
-        record.completion_percentage = min(100.0, round((record.study_hours / current_user.study_goal_hours) * 100, 1))
+        goal = current_user.study_goal_hours if (current_user.study_goal_hours and current_user.study_goal_hours > 0) else 4.0
+        record.completion_percentage = min(100.0, round((record.study_hours / goal) * 100, 1))
         db.session.commit()
         flash(f'Logged {form.study_hours.data} hours successfully!', 'success')
     return redirect(request.referrer or url_for('dashboard'))
