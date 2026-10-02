@@ -385,9 +385,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const googleSpinner = document.getElementById('googleLoginSpinner');
 
     function showAlert(type, message) {
+        const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
         alertBox.className = `alert alert-${type} d-flex align-items-center gap-2 shadow-sm`;
-        alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i> <div>${message}</div>`;
+        alertBox.innerHTML = `<i class="bi ${icon} flex-shrink-0"></i> <div>${message}</div>`;
         alertBox.classList.remove('d-none');
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'success') {
+        showAlert('success', 'Your password has been reset successfully! You can now sign in with your new password.');
     }
 
     // Google 1-Click Sign-In

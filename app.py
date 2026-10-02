@@ -303,29 +303,50 @@ def forgot_password():
             flash("No student account found with this email address. Please double-check your spelling or create a new account.", 'warning')
     return render_template('forgot_password.html', form=form)
 
+@app.route('/reset-password', defaults={'token': None}, methods=['GET', 'POST'])
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     
-    email = verify_reset_token(token, max_age=900)
-    if not email:
-        flash("The password reset link is invalid or has expired (valid for 15 minutes). Please request a new link.", 'danger')
-        return redirect(url_for('forgot_password'))
+    # If legacy token-based URL
+    if token:
+        email = verify_reset_token(token, max_age=900)
+        if not email:
+            flash("The password reset link is invalid or has expired (valid for 15 minutes). Please request a new link.", 'danger')
+            return redirect(url_for('forgot_password'))
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash("Account not found. Please register or try again.", 'danger')
+            return redirect(url_for('forgot_password'))
+        
+        form = ResetPasswordForm()
+        if form.validate_on_submit():
+            user.set_password(form.password.data)
+            db.session.commit()
+            flash("Your password has been reset successfully! You can now log in with your new password.", 'success')
+            return redirect(url_for('login'))
+        
+        return render_template('reset_password.html', form=form, token=token, email=email)
     
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        flash("Account not found. Please register or try again.", 'danger')
-        return redirect(url_for('forgot_password'))
-    
+    # If Firebase Custom Action URL (/reset-password?mode=resetPassword&oobCode=...)
     form = ResetPasswordForm()
-    if form.validate_on_submit():
-        user.set_password(form.password.data)
+    return render_template('reset_password.html', form=form, token=None)
+
+@app.route('/api/sync-reset-password', methods=['POST'])
+def api_sync_reset_password():
+    data = request.get_json() or {}
+    email = data.get('email', '').lower().strip()
+    password = data.get('password')
+    if not email or not password:
+        return jsonify({'success': False, 'message': 'Missing email or password'}), 400
+    user = User.query.filter_by(email=email).first()
+    if user:
+        user.set_password(password)
         db.session.commit()
-        flash("Your password has been reset successfully! You can now log in with your new password.", 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('reset_password.html', form=form, token=token)
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'User not found in DB'}), 404
 
 # --- Public Marketing & Legal Pages ---
 
