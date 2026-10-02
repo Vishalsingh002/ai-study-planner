@@ -285,5 +285,18 @@ function togglePasswordVisibility(inputId, iconId) {
     }
 }
 </script>
+
+<!-- Firebase SDK & Global Auth Initialization -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+    const firebaseConfig = {{ firebase_config|tojson }};
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+</script>
+
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

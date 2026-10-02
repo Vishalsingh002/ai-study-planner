@@ -271,7 +271,7 @@
                             </div>
 
                             <!-- Starter Pack Badge Callout -->
-                            <div class="p-3 rounded-3 mb-4 d-flex align-items-center gap-3 border" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(6, 182, 212, 0.05)); border-color: rgba(79, 70, 229, 0.2) !important;">
+                            <div class="p-3 rounded-3 mb-3 d-flex align-items-center gap-3 border" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(6, 182, 212, 0.05)); border-color: rgba(79, 70, 229, 0.2) !important;">
                                 <div class="text-primary fs-3">
                                     <i class="bi bi-gift-fill"></i>
                                 </div>
@@ -281,6 +281,26 @@
                                         Auto-configures 3 core subjects: <strong>Machine Learning</strong>, <strong>DSA</strong>, and <strong>Operating Systems</strong> upon sign-up.
                                     </small>
                                 </div>
+                            </div>
+
+                            <div id="registerFeedbackAlert" class="alert d-none mb-3" role="alert"></div>
+
+                            <!-- Google 1-Click Sign-Up Button -->
+                            <button type="button" id="googleRegisterBtn" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 mb-3 py-2" style="border-radius: 0.75rem; font-weight: 600; border-color: var(--border-color); background: var(--card-bg); transition: all 0.2s ease;">
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                                </svg>
+                                <span id="googleRegisterText">Sign Up with Google</span>
+                                <div class="spinner-border spinner-border-sm text-secondary d-none" id="googleRegisterSpinner" role="status"></div>
+                            </button>
+
+                            <div class="d-flex align-items-center my-3 text-muted">
+                                <hr class="flex-grow-1 my-0">
+                                <span class="px-3 small text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">Or register with email</span>
+                                <hr class="flex-grow-1 my-0">
                             </div>
 
                             <!-- Sign Up Form -->
@@ -296,7 +316,7 @@
                                         <span class="input-group-text input-group-custom-text">
                                             <i class="bi bi-person-fill"></i>
                                         </span>
-                                        {{ form.name(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Alex Kumar") }}
+                                        {{ form.name(id="regNameInput", class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Alex Kumar") }}
                                     </div>
                                     {% for error in form.name.errors %}
                                         <div class="text-danger small mt-1 d-flex align-items-center gap-1">
@@ -314,7 +334,7 @@
                                         <span class="input-group-text input-group-custom-text">
                                             <i class="bi bi-envelope-fill"></i>
                                         </span>
-                                        {{ form.email(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
+                                        {{ form.email(id="regEmailInput", class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
                                     </div>
                                     {% for error in form.email.errors %}
                                         <div class="text-danger small mt-1 d-flex align-items-center gap-1">
@@ -380,20 +400,21 @@
                                         <i class="bi bi-check2 text-success fw-bold"></i> 100% Free Forever
                                     </div>
                                     <div class="col d-flex align-items-center gap-1">
-                                        <i class="bi bi-check2 text-success fw-bold"></i> No Credit Card Needed
+                                        <i class="bi bi-shield-check text-primary fw-bold"></i> Google Firebase Security
                                     </div>
                                     <div class="col d-flex align-items-center gap-1">
-                                        <i class="bi bi-check2 text-success fw-bold"></i> Salted Password Hash
+                                        <i class="bi bi-check2 text-success fw-bold"></i> Instant 3 Core Subjects
                                     </div>
                                     <div class="col d-flex align-items-center gap-1">
-                                        <i class="bi bi-check2 text-success fw-bold"></i> Zero Ad Trackers
+                                        <i class="bi bi-check2 text-success fw-bold"></i> Zero Spam Guarantee
                                     </div>
                                 </div>
 
                                 <!-- Register Button -->
-                                <button type="submit" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
-                                    <span>Create My Account & Get Timetable</span>
-                                    <i class="bi bi-arrow-right-short fs-5"></i>
+                                <button type="submit" id="registerSubmitBtn" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <span id="registerBtnText">Create My Account & Get Timetable</span>
+                                    <i class="bi bi-arrow-right-short fs-5" id="registerBtnIcon"></i>
+                                    <div class="spinner-border spinner-border-sm text-light d-none" id="registerBtnSpinner" role="status"></div>
                                 </button>
 
                                 <!-- Terms & Privacy Agreement Notice -->
@@ -422,60 +443,193 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
 <!-- Password Visibility & Strength Meter Script -->
 <script>
-function togglePasswordVisibility(fieldId, iconId) {
-    const input = document.getElementById(fieldId);
-    const icon = document.getElementById(iconId);
-    if (!input || !icon) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'bi bi-eye-slash-fill';
-    } else {
-        input.type = 'password';
-        icon.className = 'bi bi-eye-fill';
-    }
-}
-
-// Live Password Strength Evaluation
 document.addEventListener('DOMContentLoaded', () => {
     const passInput = document.getElementById('regPassword');
+    const confirmInput = document.getElementById('regConfirmPassword');
     const bar = document.getElementById('strengthBar');
     const text = document.getElementById('strengthText');
-    if (!passInput || !bar || !text) return;
+    const form = document.getElementById('registerForm');
+    const nameInput = document.getElementById('regNameInput');
+    const emailInput = document.getElementById('regEmailInput');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    const btnText = document.getElementById('registerBtnText');
+    const btnIcon = document.getElementById('registerBtnIcon');
+    const btnSpinner = document.getElementById('registerBtnSpinner');
+    const alertBox = document.getElementById('registerFeedbackAlert');
+    const googleBtn = document.getElementById('googleRegisterBtn');
+    const googleText = document.getElementById('googleRegisterText');
+    const googleSpinner = document.getElementById('googleRegisterSpinner');
 
-    passInput.addEventListener('input', () => {
-        const val = passInput.value;
-        let score = 0;
+    function showAlert(type, message) {
+        alertBox.className = `alert alert-${type} d-flex align-items-center gap-2 shadow-sm`;
+        alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i> <div>${message}</div>`;
+        alertBox.classList.remove('d-none');
+    }
 
-        if (val.length >= 6) score += 25;
-        if (val.length >= 10) score += 25;
-        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
-        if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+    // Google 1-Click Sign-Up
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async function() {
+            try {
+                googleBtn.disabled = true;
+                googleText.textContent = 'Connecting Google Account...';
+                googleSpinner.classList.remove('d-none');
+                alertBox.classList.add('d-none');
 
-        bar.style.width = score + '%';
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const idToken = await result.user.getIdToken();
 
-        if (val.length === 0) {
-            bar.style.width = '0%';
-            text.textContent = '';
-        } else if (score <= 25) {
-            bar.style.backgroundColor = '#ef4444';
-            text.textContent = 'Weak';
-            text.className = 'small fw-semibold text-danger';
-        } else if (score <= 50) {
-            bar.style.backgroundColor = '#f59e0b';
-            text.textContent = 'Fair';
-            text.className = 'small fw-semibold text-warning';
-        } else if (score <= 75) {
-            bar.style.backgroundColor = '#06b6d4';
-            text.textContent = 'Good';
-            text.className = 'small fw-semibold text-info';
-        } else {
-            bar.style.backgroundColor = '#10b981';
-            text.textContent = 'Strong 🔥';
-            text.className = 'small fw-semibold text-success';
+                const response = await fetch('/api/firebase-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idToken: idToken,
+                        name: result.user.displayName,
+                        email: result.user.email,
+                        remember: true
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect || '/dashboard';
+                } else {
+                    showAlert('danger', data.message || 'Error signing up with Google.');
+                    googleBtn.disabled = false;
+                    googleText.textContent = 'Sign Up with Google';
+                    googleSpinner.classList.add('d-none');
+                }
+            } catch (error) {
+                console.warn("Google registration notice:", error.code, error.message);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showAlert('danger', error.message || 'Google account sign up could not be completed.');
+                }
+                googleBtn.disabled = false;
+                googleText.textContent = 'Sign Up with Google';
+                googleSpinner.classList.add('d-none');
+            }
+        });
+    }
+
+    // Live Password Strength Evaluation
+    if (passInput && bar && text) {
+        passInput.addEventListener('input', () => {
+            const val = passInput.value;
+            let score = 0;
+
+            if (val.length >= 6) score += 25;
+            if (val.length >= 10) score += 25;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+            if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+
+            bar.style.width = score + '%';
+
+            if (val.length === 0) {
+                bar.style.width = '0%';
+                text.textContent = '';
+            } else if (score <= 25) {
+                bar.style.backgroundColor = '#ef4444';
+                text.textContent = 'Weak';
+                text.className = 'small fw-semibold text-danger';
+            } else if (score <= 50) {
+                bar.style.backgroundColor = '#f59e0b';
+                text.textContent = 'Fair';
+                text.className = 'small fw-semibold text-warning';
+            } else if (score <= 75) {
+                bar.style.backgroundColor = '#06b6d4';
+                text.textContent = 'Good';
+                text.className = 'small fw-semibold text-info';
+            } else {
+                bar.style.backgroundColor = '#10b981';
+                text.textContent = 'Strong 🔥';
+                text.className = 'small fw-semibold text-success';
+            }
+        });
+    }
+
+    // Email + Password Registration with Firebase
+    form.addEventListener('submit', async function(e) {
+        const name = nameInput ? nameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+        const password = passInput ? passInput.value : '';
+        const confirmPass = confirmInput ? confirmInput.value : '';
+
+        if (!name || !email || !password) return;
+
+        if (password.length < 6) {
+            e.preventDefault();
+            showAlert('warning', 'Password must be at least 6 characters long.');
+            passInput.focus();
+            return;
         }
+
+        if (password !== confirmPass) {
+            e.preventDefault();
+            showAlert('warning', 'Passwords do not match. Please verify both fields.');
+            confirmInput.focus();
+            return;
+        }
+
+        e.preventDefault();
+        submitBtn.disabled = true;
+        btnIcon.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        btnText.textContent = 'Setting up student profile...';
+        alertBox.classList.add('d-none');
+
+        try {
+            // Create Firebase Auth account
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            if (name && userCredential.user.updateProfile) {
+                await userCredential.user.updateProfile({ displayName: name });
+            }
+            const idToken = await userCredential.user.getIdToken();
+
+            // Bridge account into Flask SQLite/Postgres DB
+            const response = await fetch('/api/firebase-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idToken: idToken,
+                    name: name,
+                    email: email,
+                    remember: true
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = data.redirect || '/dashboard';
+                return;
+            } else {
+                showAlert('danger', data.message || 'Database synchronization error.');
+            }
+        } catch (error) {
+            console.warn("Firebase registration attempt:", error.code, error.message);
+            let msg = 'Could not create account. Please try again.';
+            if (error.code === 'auth/email-already-in-use') {
+                msg = `An account already exists with <strong>${email}</strong>. Please <a href="/login" class="alert-link">Sign In</a> instead.`;
+            } else if (error.code === 'auth/invalid-email') {
+                msg = 'Please enter a valid email address.';
+            } else if (error.code === 'auth/weak-password') {
+                msg = 'Password should be at least 6 characters.';
+            } else {
+                // Fallback to normal form submit
+                form.submit();
+                return;
+            }
+            showAlert('danger', msg);
+        }
+
+        submitBtn.disabled = false;
+        btnIcon.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        btnText.textContent = 'Create My Account & Get Timetable';
     });
 });
 </script>

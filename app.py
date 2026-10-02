@@ -1,5 +1,7 @@
 import os
 import uuid
+import json
+import urllib.request
 import cloudinary
 from cloudinary.uploader import upload
 from datetime import datetime, date, timedelta
@@ -65,6 +67,44 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# --- Firebase Authentication Configuration & Helper ---
+FIREBASE_CONFIG = {
+    'apiKey': os.environ.get('FIREBASE_API_KEY', 'AIzaSyDgVHh-UvQcT-qFJeNYORYx8QlWOijDmSI'),
+    'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN', 'studyai-f8351.firebaseapp.com'),
+    'projectId': os.environ.get('FIREBASE_PROJECT_ID', 'studyai-f8351'),
+    'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET', 'studyai-f8351.firebasestorage.app'),
+    'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID', '44359729730'),
+    'appId': os.environ.get('FIREBASE_APP_ID', '1:44359729730:web:43ab31f39d9eaa6d51e3db'),
+    'measurementId': os.environ.get('FIREBASE_MEASUREMENT_ID', 'G-2V6TXE54Q0')
+}
+
+@app.context_processor
+def inject_firebase():
+    return {'firebase_config': FIREBASE_CONFIG}
+
+def verify_firebase_token(id_token):
+    """
+    Verifies Firebase JWT ID token directly against Google Identity Toolkit endpoint.
+    Returns decoded user dictionary on success, or None on failure.
+    """
+    api_key = FIREBASE_CONFIG.get('apiKey')
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={api_key}"
+    payload = json.dumps({"idToken": id_token}).encode('utf-8')
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={'Content-Type': 'application/json'}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            users = data.get('users', [])
+            if users:
+                return users[0]
+    except Exception as e:
+        app.logger.warning(f"Firebase token verification failed: {e}")
+    return None
+
 # Auto-add profile_image column if missing (works safely for SQLite and PostgreSQL)
 with app.app_context():
     try:
@@ -86,6 +126,76 @@ with app.app_context():
             pass
 
 # --- Landing & Auth ---
+
+@app.route('/api/firebase-login', methods=['POST'])
+def api_firebase_login():
+    """
+    Authenticates a user via Firebase Auth ID token and establishes Flask-Login session.
+    Automatically creates the user in the database and seeds starter subjects if new.
+    """
+    data = request.get_json() or {}
+    id_token = data.get('idToken')
+    if not id_token:
+        return jsonify({'success': False, 'message': 'Missing Firebase ID token'}), 400
+
+    verified_user = verify_firebase_token(id_token)
+    if not verified_user:
+        return jsonify({'success': False, 'message': 'Invalid or expired Firebase authentication token'}), 401
+
+    email = verified_user.get('email', '').lower().strip()
+    if not email:
+        return jsonify({'success': False, 'message': 'Firebase user does not have an associated email'}), 400
+
+    name = data.get('name') or verified_user.get('displayName') or email.split('@')[0].capitalize()
+
+    # Look up existing user in SQLite / PostgreSQL
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        try:
+            user = User(
+                name=name.strip(),
+                email=email
+            )
+            # Secure random hash for internal DB field
+            user.set_password(uuid.uuid4().hex)
+            db.session.add(user)
+            db.session.flush()
+
+            # Seed default starter subjects
+            default_subjects = [
+                ("Machine Learning", "#4f46e5"),
+                ("Data Structures & Algorithms", "#06b6d4"),
+                ("Operating Systems", "#10b981")
+            ]
+            for sub_name, color in default_subjects:
+                db.session.add(Subject(user_id=user.id, subject_name=sub_name, color=color))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating Firebase user in DB: {e}")
+            return jsonify({'success': False, 'message': 'Failed to create student account in database.'}), 500
+
+    # Sync photo URL if Google account has one and user has default avatar
+    photo_url = verified_user.get('photoUrl')
+    if photo_url and (not user.profile_image or user.profile_image.startswith('avatar-')):
+        try:
+            user.profile_image = photo_url
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+    remember = bool(data.get('remember', True))
+    login_user(user, remember=remember)
+    flash(f'Welcome, {user.name}!', 'success')
+    return jsonify({
+        'success': True,
+        'redirect': url_for('dashboard'),
+        'user': {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        }
+    })
 
 @app.route('/')
 def index():

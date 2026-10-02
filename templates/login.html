@@ -254,7 +254,27 @@
                             </div>
 
                             <!-- Sign In Form -->
-                            <form method="POST" action="{{ url_for('login') }}">
+                            <div id="loginFeedbackAlert" class="alert d-none mb-3" role="alert"></div>
+
+                            <!-- Google 1-Click Sign-In Button -->
+                            <button type="button" id="googleLoginBtn" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 mb-3 py-2" style="border-radius: 0.75rem; font-weight: 600; border-color: var(--border-color); background: var(--card-bg); transition: all 0.2s ease;">
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                                </svg>
+                                <span id="googleLoginText">Continue with Google</span>
+                                <div class="spinner-border spinner-border-sm text-secondary d-none" id="googleLoginSpinner" role="status"></div>
+                            </button>
+
+                            <div class="d-flex align-items-center my-3 text-muted">
+                                <hr class="flex-grow-1 my-0">
+                                <span class="px-3 small text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">Or sign in with email</span>
+                                <hr class="flex-grow-1 my-0">
+                            </div>
+
+                            <form id="loginForm" method="POST" action="{{ url_for('login') }}">
                                 {{ form.hidden_tag() }}
 
                                 <!-- Email Address -->
@@ -266,7 +286,7 @@
                                         <span class="input-group-text input-group-custom-text">
                                             <i class="bi bi-envelope-fill"></i>
                                         </span>
-                                        {{ form.email(class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
+                                        {{ form.email(id="loginEmailInput", class="form-control form-control-custom border-start-0 ps-2" + (" is-invalid" if form.email.errors else ""), placeholder="name@college.edu or name@gmail.com") }}
                                     </div>
                                     {% for error in form.email.errors %}
                                         <div class="text-danger small mt-1 d-flex align-items-center gap-1">
@@ -312,16 +332,17 @@
                                 </div>
 
                                 <!-- Sign In Button -->
-                                <button type="submit" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
-                                    <span>Sign In & Open Dashboard</span>
-                                    <i class="bi bi-arrow-right-short fs-5"></i>
+                                <button type="submit" id="loginSubmitBtn" class="btn btn-auth-submit w-100 d-flex align-items-center justify-content-center gap-2">
+                                    <span id="loginBtnText">Sign In & Open Dashboard</span>
+                                    <i class="bi bi-arrow-right-short fs-5" id="loginBtnIcon"></i>
+                                    <div class="spinner-border spinner-border-sm text-light d-none" id="loginBtnSpinner" role="status"></div>
                                 </button>
                             </form>
 
                             <!-- Trust Badges Row -->
                             <div class="row row-cols-2 g-2 mt-4 pt-3 border-top text-muted small" style="font-size: 0.78rem;">
                                 <div class="col d-flex align-items-center gap-1">
-                                    <i class="bi bi-shield-check text-success fw-bold"></i> 256-Bit SSL Secured
+                                    <i class="bi bi-shield-check text-success fw-bold"></i> Google Firebase Protected
                                 </div>
                                 <div class="col d-flex align-items-center gap-1">
                                     <i class="bi bi-database-check text-primary fw-bold"></i> Cloud Synchronized
@@ -345,20 +366,137 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Password Visibility Helper -->
+{% block extra_scripts %}
 <script>
-function togglePasswordVisibility(fieldId, iconId) {
-    const input = document.getElementById(fieldId);
-    const icon = document.getElementById(iconId);
-    if (!input || !icon) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'bi bi-eye-slash-fill';
-    } else {
-        input.type = 'password';
-        icon.className = 'bi bi-eye-fill';
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('loginEmailInput');
+    const passwordInput = document.getElementById('loginPassword');
+    const rememberCheck = document.getElementById('rememberMeCheck');
+    const submitBtn = document.getElementById('loginSubmitBtn');
+    const btnText = document.getElementById('loginBtnText');
+    const btnIcon = document.getElementById('loginBtnIcon');
+    const btnSpinner = document.getElementById('loginBtnSpinner');
+    const alertBox = document.getElementById('loginFeedbackAlert');
+    const googleBtn = document.getElementById('googleLoginBtn');
+    const googleText = document.getElementById('googleLoginText');
+    const googleSpinner = document.getElementById('googleLoginSpinner');
+
+    function showAlert(type, message) {
+        alertBox.className = `alert alert-${type} d-flex align-items-center gap-2 shadow-sm`;
+        alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i> <div>${message}</div>`;
+        alertBox.classList.remove('d-none');
     }
-}
+
+    // Google 1-Click Sign-In
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async function() {
+            try {
+                googleBtn.disabled = true;
+                googleText.textContent = 'Connecting Google Account...';
+                googleSpinner.classList.remove('d-none');
+                alertBox.classList.add('d-none');
+
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const idToken = await result.user.getIdToken();
+
+                const response = await fetch('/api/firebase-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idToken: idToken,
+                        name: result.user.displayName,
+                        email: result.user.email,
+                        remember: true
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect || '/dashboard';
+                } else {
+                    showAlert('danger', data.message || 'Authentication error with server.');
+                    googleBtn.disabled = false;
+                    googleText.textContent = 'Continue with Google';
+                    googleSpinner.classList.add('d-none');
+                }
+            } catch (error) {
+                console.warn("Google sign in notice:", error.code, error.message);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showAlert('danger', error.message || 'Google sign-in could not be completed.');
+                }
+                googleBtn.disabled = false;
+                googleText.textContent = 'Continue with Google';
+                googleSpinner.classList.add('d-none');
+            }
+        });
+    }
+
+    // Standard Email + Password submission with Firebase first & Flask fallback
+    form.addEventListener('submit', async function(e) {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) return; // let native validation handle empty
+
+        e.preventDefault();
+        submitBtn.disabled = true;
+        btnIcon.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        btnText.textContent = 'Verifying Account...';
+        alertBox.classList.add('d-none');
+
+        try {
+            // Attempt Firebase Auth sign-in
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            const idToken = await userCredential.user.getIdToken();
+
+            // Bridge session into Flask backend
+            const response = await fetch('/api/firebase-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idToken: idToken,
+                    email: email,
+                    remember: rememberCheck ? rememberCheck.checked : true
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = data.redirect || '/dashboard';
+                return;
+            } else {
+                showAlert('danger', data.message || 'Login verification failed.');
+            }
+        } catch (error) {
+            console.warn("Firebase sign-in attempt:", error.code, error.message);
+
+            // If account was created before Firebase integration (legacy DB user), fallback to standard Flask form POST
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                btnText.textContent = 'Checking Database...';
+                form.submit();
+                return;
+            }
+
+            let msg = 'Invalid email or password. Please try again.';
+            if (error.code === 'auth/wrong-password') {
+                msg = 'Incorrect password. Please verify or use Forgot Password.';
+            } else if (error.code === 'auth/too-many-requests') {
+                msg = 'Too many failed login attempts. Access temporarily blocked. Please reset your password or try again later.';
+            }
+
+            showAlert('danger', msg);
+        }
+
+        submitBtn.disabled = false;
+        btnIcon.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        btnText.textContent = 'Sign In & Open Dashboard';
+    });
+});
 </script>
 {% endblock %}

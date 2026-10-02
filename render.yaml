@@ -53,4 +53,26 @@ services:
         sync: false
 
       - key: MAIL_DEFAULT_SENDER_NAME
-        value: "StudyAI Academic Support"
+        value: "StudyAI Academic Support"
+
+      - key: FIREBASE_API_KEY
+        value: "AIzaSyDgVHh-UvQcT-qFJeNYORYx8QlWOijDmSI"
+
+      - key: FIREBASE_AUTH_DOMAIN
+        value: "studyai-f8351.firebaseapp.com"
+
+      - key: FIREBASE_PROJECT_ID
+        value: "studyai-f8351"
+
+      - key: FIREBASE_STORAGE_BUCKET
+        value: "studyai-f8351.firebasestorage.app"
+
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        value: "44359729730"
+
+      - key: FIREBASE_APP_ID
+        value: "1:44359729730:web:43ab31f39d9eaa6d51e3db"
+
+      - key: FIREBASE_MEASUREMENT_ID
+        value: "G-2V6TXE54Q0"
+
