@@ -229,6 +229,30 @@ def register():
                 db.session.add(Subject(user_id=user.id, subject_name=name, color=color))
             db.session.commit()
 
+            # Ensure user is provisioned in Firebase Auth so Forgot Password works seamlessly
+            api_key = FIREBASE_CONFIG.get('apiKey')
+            if api_key:
+                try:
+                    signup_url = f'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}'
+                    payload = {
+                        'email': user.email,
+                        'password': form.password.data,
+                        'displayName': user.name,
+                        'returnSecureToken': False
+                    }
+                    req = urllib.request.Request(
+                        signup_url,
+                        data=json.dumps(payload).encode('utf-8'),
+                        headers={'Content-Type': 'application/json'}
+                    )
+                    try:
+                        with urllib.request.urlopen(req, timeout=5):
+                            pass
+                    except urllib.error.HTTPError:
+                        pass
+                except Exception as fb_err:
+                    app.logger.warning(f"Firebase auto-registration sync notice: {fb_err}")
+
             flash('Account created successfully! You can now log in.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
@@ -295,9 +319,30 @@ def forgot_password():
         submitted_email = form.email.data.lower().strip()
         user = User.query.filter_by(email=submitted_email).first()
         if user:
+            # 1. Ensure user exists in Firebase Auth and dispatch reset email via Firebase REST API
+            api_key = FIREBASE_CONFIG.get('apiKey')
+            if api_key:
+                try:
+                    signup_url = f'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}'
+                    payload = {'email': user.email, 'password': f'Sync_{secrets.token_hex(8)}!', 'returnSecureToken': False}
+                    req_sign = urllib.request.Request(signup_url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
+                    try:
+                        with urllib.request.urlopen(req_sign, timeout=5): pass
+                    except urllib.error.HTTPError: pass
+
+                    # Dispatch reset email
+                    oob_url = f'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={api_key}'
+                    oob_data = {'requestType': 'PASSWORD_RESET', 'email': user.email}
+                    req_oob = urllib.request.Request(oob_url, data=json.dumps(oob_data).encode('utf-8'), headers={'Content-Type': 'application/json'})
+                    with urllib.request.urlopen(req_oob, timeout=6): pass
+                except Exception as fb_err:
+                    app.logger.warning(f"Firebase REST dispatch notice: {fb_err}")
+
+            # 2. Also trigger standard SMTP reset if configured
             token = generate_reset_token(user.email)
             reset_url = url_for('reset_password', token=token, _external=True)
             send_reset_email(recipient_email=user.email, recipient_name=user.name, reset_url=reset_url)
+
             flash(f"A password reset link has been dispatched to your registered email ({user.email}). Please check your inbox and spam folder. Link expires in 15 minutes.", 'success')
             return redirect(url_for('login'))
         else:
