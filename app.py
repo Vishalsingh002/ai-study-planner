@@ -32,13 +32,25 @@ if is_cloudinary_configured:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-insecure-secret-change-me')
 
-# --- Database config: Turso (libSQL) if env vars set, else local SQLite fallback ---
-TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')   # e.g. libsql://your-db-name.turso.io
+# --- Database config: PostgreSQL / Turso (libSQL) / Local SQLite ---
+DATABASE_URL = os.environ.get('DATABASE_URL')
+TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')
 TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
 
-if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
+selected_uri = 'sqlite:///database.db'
+engine_options = {}
+
+if DATABASE_URL:
+    # Standard Render PostgreSQL fix (postgres:// -> postgresql://)
+    clean_db_url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    selected_uri = clean_db_url
+    engine_options = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
+    print("Database: Using PostgreSQL database.")
+elif TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
     try:
-        import sqlalchemy_libsql  # noqa: F401 - verify dialect driver is installed
         clean_url = TURSO_DATABASE_URL.strip().strip('"').strip("'")
         for prefix in ('libsql://', 'https://', 'http://'):
             if clean_url.startswith(prefix):
@@ -50,22 +62,29 @@ if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
             clean_token = clean_token[len("Bearer "):].strip()
         
         if clean_url and clean_token:
-            # Format required by sqlalchemy-libsql for secure Turso connections:
-            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+libsql://{clean_url}?secure=true'
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-                'connect_args': {
-                    'auth_token': clean_token,
-                }
-            }
-        else:
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-    except Exception as err:
-        print(f"Notice: Turso dialect unavailable or error ({err}). Falling back to local SQLite.")
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-else:
-    # Local development fallback — Turso set nahi hai to normal sqlite file use hogi
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+            # Pre-flight check: Test if Turso connection actually works BEFORE locking SQLAlchemy
+            from sqlalchemy import create_engine as test_create_engine
+            test_uri = f'sqlite+libsql://{clean_url}?secure=true'
+            test_eng = test_create_engine(test_uri, connect_args={'auth_token': clean_token})
+            with test_eng.connect() as test_c:
+                test_c.execute(text("SELECT 1"))
+            test_eng.dispose()
 
+            selected_uri = test_uri
+            engine_options = {
+                'connect_args': {'auth_token': clean_token},
+                'pool_pre_ping': True,
+            }
+            print("Database: Turso Cloud Database verified and connected.")
+    except Exception as err:
+        print(f"Notice: Turso pre-flight check failed ({err}). Safely falling back to local SQLite.")
+        selected_uri = 'sqlite:///database.db'
+        engine_options = {}
+else:
+    selected_uri = 'sqlite:///database.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = selected_uri
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -79,7 +98,7 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Auto-add profile_image column if missing (works for local SQLite AND Turso/libSQL)
+# Auto-add profile_image column if missing (works safely for SQLite and PostgreSQL)
 with app.app_context():
     try:
         db.create_all()
@@ -89,18 +108,10 @@ with app.app_context():
                 if cols and 'profile_image' not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT 'avatar-1'"))
                     conn.commit()
-            except Exception as pe:
-                print(f"Table inspection notice: {pe}")
+            except Exception:
+                pass
     except Exception as e:
-        print(f"Database startup notice / auto-migration: {e}")
-        if app.config['SQLALCHEMY_DATABASE_URI'] != 'sqlite:///database.db':
-            print("Notice: Primary database connection failed. Falling back to local SQLite.")
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
-            try:
-                db.create_all()
-            except Exception as e2:
-                print(f"Fallback SQLite error: {e2}")
+        print(f"Database schema notice: {e}")
     finally:
         try:
             db.engine.dispose()
@@ -158,14 +169,18 @@ def login():
         return redirect(url_for('dashboard'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data.lower().strip()).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember.data)
-            flash(f'Welcome back, {user.name}!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password.', 'danger')
+        try:
+            user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+            if user and user.check_password(form.password.data):
+                login_user(user, remember=form.remember.data)
+                flash(f'Welcome back, {user.name}!', 'success')
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('dashboard'))
+            else:
+                flash('Invalid email or password.', 'danger')
+        except Exception as e:
+            app.logger.error(f"Login database error: {e}")
+            flash('Database connectivity issue. Please try again in a few moments.', 'danger')
     return render_template('login.html', form=form)
 
 @app.route('/logout')
@@ -428,6 +443,15 @@ def reports():
 def analytics_data():
     user_id = current_user.id
     today = date.today()
+    thirty_days_ago = today - timedelta(days=29)
+
+    # Single batch fetch for all past 30 days to eliminate query storm & latency
+    recent_records = Progress.query.filter(
+        Progress.user_id == user_id,
+        Progress.date >= thirty_days_ago,
+        Progress.date <= today
+    ).all()
+    progress_map = {r.date: r.study_hours for r in recent_records}
 
     weekly_labels = []
     weekly_study_data = []
@@ -435,8 +459,7 @@ def analytics_data():
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
         weekly_labels.append(day.strftime("%a"))
-        rec = Progress.query.filter_by(user_id=user_id, date=day).first()
-        weekly_study_data.append(rec.study_hours if rec else 0.0)
+        weekly_study_data.append(progress_map.get(day, 0.0))
         weekly_goal_data.append(current_user.study_goal_hours)
 
     subjects = Subject.query.filter_by(user_id=user_id).all()
@@ -455,8 +478,7 @@ def analytics_data():
     for i in range(29, -1, -1):
         day = today - timedelta(days=i)
         monthly_labels.append(day.strftime("%d %b"))
-        rec = Progress.query.filter_by(user_id=user_id, date=day).first()
-        monthly_hours_data.append(rec.study_hours if rec else 0.0)
+        monthly_hours_data.append(progress_map.get(day, 0.0))
 
     return jsonify({
         'weekly': {'labels': weekly_labels, 'study_hours': weekly_study_data, 'target_hours': weekly_goal_data},

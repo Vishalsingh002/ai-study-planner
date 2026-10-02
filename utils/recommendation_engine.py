@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 from models import Subject, Task, Progress
 
 class AIStudyRecommendationEngine:
