@@ -56,23 +56,23 @@ services:
         value: "StudyAI Academic Support"
 
       - key: FIREBASE_API_KEY
-        value: "AIzaSyDgVHh-UvQcT-qFJeNYORYx8QlWOijDmSI"
+        value: "AIzaSyB9O-7D_yfeOUicy4znCzIm0ybne62tI0k"
 
       - key: FIREBASE_AUTH_DOMAIN
-        value: "studyai-f8351.firebaseapp.com"
+        value: "studyai-academic.firebaseapp.com"
 
       - key: FIREBASE_PROJECT_ID
-        value: "studyai-f8351"
+        value: "studyai-academic"
 
       - key: FIREBASE_STORAGE_BUCKET
-        value: "studyai-f8351.firebasestorage.app"
+        value: "studyai-academic.firebasestorage.app"
 
       - key: FIREBASE_MESSAGING_SENDER_ID
-        value: "44359729730"
+        value: "185231950007"
 
       - key: FIREBASE_APP_ID
-        value: "1:44359729730:web:43ab31f39d9eaa6d51e3db"
+        value: "1:185231950007:web:e0a7ef780287d4149a8d32"
 
       - key: FIREBASE_MEASUREMENT_ID
-        value: "G-2V6TXE54Q0"
+        value: "G-REEZJW3M8L"
 

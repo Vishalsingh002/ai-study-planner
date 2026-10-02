@@ -69,13 +69,13 @@ def load_user(user_id):
 
 # --- Firebase Authentication Configuration & Helper ---
 FIREBASE_CONFIG = {
-    'apiKey': os.environ.get('FIREBASE_API_KEY', 'AIzaSyDgVHh-UvQcT-qFJeNYORYx8QlWOijDmSI'),
-    'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN', 'studyai-f8351.firebaseapp.com'),
-    'projectId': os.environ.get('FIREBASE_PROJECT_ID', 'studyai-f8351'),
-    'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET', 'studyai-f8351.firebasestorage.app'),
-    'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID', '44359729730'),
-    'appId': os.environ.get('FIREBASE_APP_ID', '1:44359729730:web:43ab31f39d9eaa6d51e3db'),
-    'measurementId': os.environ.get('FIREBASE_MEASUREMENT_ID', 'G-2V6TXE54Q0')
+    'apiKey': os.environ.get('FIREBASE_API_KEY', 'AIzaSyB9O-7D_yfeOUicy4znCzIm0ybne62tI0k'),
+    'authDomain': os.environ.get('FIREBASE_AUTH_DOMAIN', 'studyai-academic.firebaseapp.com'),
+    'projectId': os.environ.get('FIREBASE_PROJECT_ID', 'studyai-academic'),
+    'storageBucket': os.environ.get('FIREBASE_STORAGE_BUCKET', 'studyai-academic.firebasestorage.app'),
+    'messagingSenderId': os.environ.get('FIREBASE_MESSAGING_SENDER_ID', '185231950007'),
+    'appId': os.environ.get('FIREBASE_APP_ID', '1:185231950007:web:e0a7ef780287d4149a8d32'),
+    'measurementId': os.environ.get('FIREBASE_MEASUREMENT_ID', 'G-REEZJW3M8L')
 }
 
 @app.context_processor
