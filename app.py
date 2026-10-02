@@ -1,6 +1,7 @@
 import os
 import uuid
 import json
+import secrets
 import urllib.request
 import cloudinary
 from cloudinary.uploader import upload
@@ -347,6 +348,52 @@ def api_sync_reset_password():
         db.session.commit()
         return jsonify({'success': True})
     return jsonify({'success': False, 'message': 'User not found in DB'}), 404
+
+@app.route('/api/check-reset-email', methods=['POST'])
+def api_check_reset_email():
+    """
+    Verifies that the requested email belongs to an existing student in our database.
+    If yes, ensures the user is also registered in Firebase Auth so sendPasswordResetEmail
+    actually delivers the reset email instead of silently dropping it due to enumeration protection.
+    """
+    data = request.get_json() or {}
+    email = data.get('email', '').lower().strip()
+    if not email:
+        return jsonify({'exists': False, 'message': 'Please enter a valid email address.'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({
+            'exists': False,
+            'message': f'No account found with <strong>{email}</strong>. Please check your spelling or create a new student account.'
+        })
+
+    # Ensure provisioned in Firebase Auth
+    api_key = FIREBASE_CONFIG.get('apiKey')
+    if api_key:
+        try:
+            signup_url = f'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}'
+            payload = {
+                'email': user.email,
+                'password': f'Sync_{secrets.token_hex(8)}!',
+                'displayName': user.name,
+                'returnSecureToken': False
+            }
+            req = urllib.request.Request(
+                signup_url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=5):
+                    pass
+            except urllib.error.HTTPError as e:
+                # If EMAIL_EXISTS, that is expected and good
+                pass
+        except Exception as e:
+            app.logger.warning(f"Could not provision user to Firebase: {e}")
+
+    return jsonify({'exists': True})
 
 # --- Public Marketing & Legal Pages ---
 
